@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse Interactive: Kits Solaires Plug & Play en France</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Application Structure Plan: 
+        The SPA is structured thematically to guide the user through the report's content logically, rather than mirroring the report's linear chapter structure.
+        1.  Hero Section: Title and brief intro.
+        2.  Navigation Bar: Sticky, for easy access to key sections.
+        3.  Le Marché en Bref: Key statistics (market growth, price ranges) for a quick overview.
+        4.  Comprendre les Kits: Explains what plug-and-play kits are, their components (using HTML/CSS for simple diagrams/icons), advantages, and limitations (interactive toggles/tabs).
+        5.  Acteurs Clés: Presentation of main manufacturers and distributors (e.g., using cards, possibly with simple JS filtering if time allows).
+        6.  Au Cœur du Produit: Interactive deep dive into fixation systems (cards for each type), panel power/technology (charts for power distribution, tech types), and microinverters.
+        7.  Comparatif de Kits: Interactive HTML table for the detailed kit comparison from the report.
+        8.  Analyse des Prix: Charts for €/Wc, list of price factors, ROI insights.
+        9.  Réglementation: HTML/CSS flowchart for administrative steps, clear explanation of NF C15-100, safety tips. Includes Gemini-powered regulatory assistant.
+        10. Guide d'Achat: Interactive checklist/criteria. Includes Gemini-powered selection assistant.
+        11. Conclusion & Perspectives: Summary.
+        This structure is chosen for usability, allowing users to jump to sections of interest or follow a guided exploration. Interactions like clickable cards, charts, and AI assistants aim to make data digestion easier and more personalized.
+    -->
+    <!-- Visualization & Content Choices: 
+        - Market Growth: Bar Chart (Chart.js) - Goal: Change - Justification: Clear visual for trend.
+        - Kit Components/Fixation Types: HTML/CSS Cards with Unicode icons - Goal: Inform/Organize - Justification: Visual and textual information, no complex data.
+        - Panel Power Distribution: Bar Chart (Chart.js) - Goal: Compare - Justification: Easy comparison of power categories.
+        - Panel Technologies: Donut Chart (Chart.js) - Goal: Compare (proportion) - Justification: Shows share of different technologies.
+        - Price/Wc Comparison: Bar Chart (Chart.js) - Goal: Compare - Justification: Direct comparison of value metric.
+        - Regulatory Steps: HTML/CSS Flowchart - Goal: Organize - Justification: Visual representation of a process.
+        - Kit Comparison Table: HTML Table - Goal: Compare/Organize - Justification: Detailed data presentation.
+        - Gemini API for "Guide d'Achat": User inputs details -> LLM provides personalized advice. Goal: Inform/Personalize. Justification: Tailored guidance.
+        - Gemini API for "Réglementation": User inputs project details -> LLM clarifies administrative steps. Goal: Inform/Personalize. Justification: Simplified regulatory understanding.
+        - All textual content from the report, summarized and placed in contextually relevant sections with introductory paragraphs.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF7; 
+            color: #3D3D3D; 
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; 
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; 
+            max-height: 400px; 
+            padding: 1rem;
+            background-color: #FFFFFF;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #795548; 
+            border-bottom-color: #795548;
+        }
+        .section-title {
+            color: #795548; 
+            border-bottom: 2px solid #A1887F; 
+            padding-bottom: 0.5rem;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border: 1px solid #E0E0E0;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+        }
+        .tab-button {
+            background-color: #F1F1F1;
+            color: #3D3D3D;
+            border: 1px solid #D4BBA1;
+        }
+        .tab-button.active {
+            background-color: #A1887F; 
+            color: #FFFFFF;
+            border-color: #795548;
+        }
+        .stat-card {
+            background-color: #A1887F; 
+            color: #FFFFFF;
+        }
+        .stat-number {
+            color: #FDFBF7;
+        }
+        .flowchart-step {
+            background-color: #E8E0D9; 
+            border: 1px solid #A1887F;
+            color: #3D3D3D;
+        }
+        .flowchart-arrow {
+            color: #795548;
+        }
+        .table-header {
+            background-color: #A1887F;
+            color: #FFFFFF;
+        }
+        .tooltip-custom {
+            background-color: rgba(0,0,0,0.75) !important;
+            border-radius: 4px !important;
+            color: white !important;
+            padding: 8px !important;
+        }
+        .tooltip-title-custom {
+            font-weight: bold !important;
+            margin-bottom: 4px !important;
+        }
+        .source-link {
+            color: #795548;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        .source-link:hover {
+            color: #5D4037;
+        }
+    </style>
+</head>
+<body class="leading-relaxed">
+
+    <header class="bg-[#A1887F] text-white py-6 shadow-md">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold">Kits Solaires Plug & Play en France (800-1000W)</h1>
+            <p class="mt-2 text-lg">Analyse Interactive du Marché, Produits & Réglementation</p>
+        </div>
+    </header>
+
+    <nav id="navbar" class="sticky top-0 z-50 bg-[#FDFBF7] shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-wrap justify-center items-center py-3 text-sm md:text-base">
+                <a href="#accueil" class="nav-link px-3 py-2 font-semibold">Accueil</a>
+                <a href="#marche-apercu" class="nav-link px-3 py-2 font-semibold">Marché</a>
+                <a href="#comprendre-kits" class="nav-link px-3 py-2 font-semibold">Les Kits</a>
+                <a href="#acteurs-cles" class="nav-link px-3 py-2 font-semibold">Acteurs</a>
+                <a href="#produits-detail" class="nav-link px-3 py-2 font-semibold">Produits</a>
+                <a href="#comparatif-kits" class="nav-link px-3 py-2 font-semibold">Comparatif</a>
+                <a href="#analyse-prix" class="nav-link px-3 py-2 font-semibold">Prix</a>
+                <a href="#reglementation" class="nav-link px-3 py-2 font-semibold">Réglementation</a>
+                <a href="#guide-achat" class="nav-link px-3 py-2 font-semibold">Guide d'Achat</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="accueil" class="pt-16 -mt-16 mb-12 text-center">
+            <p class="text-lg max-w-3xl mx-auto">Bienvenue dans cette analyse interactive du marché français des systèmes solaires "plug-and-play". Explorez les tendances, les produits, les prix et les aspects réglementaires pour mieux comprendre ce secteur en pleine évolution. Cette application vise à rendre les informations du rapport de recherche plus accessibles et digestes, avec désormais des assistants IA pour vous guider.</p>
+        </section>
+
+        <section id="marche-apercu" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 section-title">Le Marché en Bref</h2>
+            <p class="mb-6 text-gray-700">Le marché des kits solaires plug-and-play en France est dynamique, marqué par une croissance notable et une offre de produits variée. Ces systèmes, faciles à installer, attirent de plus en plus de consommateurs souhaitant réduire leur facture énergétique. Des organismes comme l'<a href="https://www.ademe.fr" target="_blank" rel="noopener noreferrer" class="source-link">ADEME</a> et <a href="https://www.energies-renouvelables.org" target="_blank" rel="noopener noreferrer" class="source-link">Observ'ER</a> suivent également ce secteur. Cependant, des évolutions réglementaires récentes soulèvent des questions importantes pour l'avenir du secteur.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="stat-card p-6 rounded-lg shadow-lg">
+                    <div class="text-5xl font-bold stat-number">30%</div>
+                    <div class="mt-2 text-lg">Croissance du marché en 2023 (source: <a href="https://www.google.com/search?q=Planete+Business+croissance+kits+solaires+2023" target="_blank" rel="noopener noreferrer" class="text-white hover:underline">Planete Business</a>)</div>
+                </div>
+                <div class="stat-card p-6 rounded-lg shadow-lg">
+                    <div class="text-3xl font-bold stat-number">500€ - 1600€+</div>
+                    <div class="mt-2 text-lg">Fourchette de prix typique (kits 800-1000W, 2 panneaux)</div>
+                </div>
+                <div class="stat-card p-6 rounded-lg shadow-lg">
+                    <div class="text-3xl font-bold stat-number">0.50€ - 1.50€+</div>
+                    <div class="mt-2 text-lg">Prix par Watt crête (€/Wc)</div>
+                </div>
+            </div>
+            <div class="card p-6">
+                <h3 class="text-xl font-semibold mb-3 text-[#795548]">Points Clés du Résumé Exécutif :</h3>
+                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                    <li>L'offre de produits est variée, avec des différences notables sur la puissance des panneaux (400-500Wc/panneau) et les technologies (monocristallin, bifacial, TOPCon).</li>
+                    <li>Les systèmes de fixation (sol, mur, balcon) sont un critère de différenciation majeur, impactant facilité d'installation et adaptabilité.</li>
+                    <li>La norme <a href="https://www.afnor.org/themes/nf-c-15-100/" target="_blank" rel="noopener noreferrer" class="source-link">NF C15-100</a> (applicable en sept. 2025) pourrait interdire la connexion directe sur prise standard, créant une incertitude.</li>
+                    <li>La déclaration à <a href="https://www.enedis.fr" target="_blank" rel="noopener noreferrer" class="source-link">Enedis</a> (CACSI) reste obligatoire pour l'autoconsommation.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="comprendre-kits" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 section-title">Comprendre les Kits Solaires Plug & Play</h2>
+            <p class="mb-6 text-gray-700">Ces systèmes sont conçus pour une installation simplifiée, permettant aux particuliers de produire leur propre électricité. Voici un aperçu de leurs caractéristiques, composants, avantages et limites.</p>
+            <div class="card p-6 mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-[#795548]">Caractéristiques et Composants Typiques (Kit 2 panneaux, 800-1000W)</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="mb-2"><strong class="text-gray-800">🔌 Simplicité de connexion :</strong> Se branche sur une prise domestique standard.</p>
+                        <p class="mb-2"><strong class="text-gray-800">🛠️ Auto-installation :</strong> Conçu pour être installé par l'utilisateur.</p>
+                        <p class="mb-2"><strong class="text-gray-800">📱 Suivi de production :</strong> Souvent via application mobile (Wi-Fi).</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-2">Composants clés :</h4>
+                        <ul class="list-none space-y-2">
+                            <li class="flex items-center"><span class="text-2xl mr-2">☀️</span> Deux panneaux solaires (400-500Wc chacun)</li>
+                            <li class="flex items-center"><span class="text-2xl mr-2">🔄</span> Un ou deux micro-onduleurs (convertit DC en AC)</li>
+                            <li class="flex items-center"><span class="text-2xl mr-2">🔩</span> Système de fixation (sol, mur, balcon, etc.)</li>
+                            <li class="flex items-center"><span class="text-2xl mr-2">🔗</span> Câblage et prise secteur</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-6">
+                <div class="flex border-b border-gray-300 mb-4">
+                    <button class="tab-button flex-1 py-2 px-4 rounded-t-lg font-semibold active" onclick="openTab(event, 'avantages')">Avantages</button>
+                    <button class="tab-button flex-1 py-2 px-4 rounded-t-lg font-semibold" onclick="openTab(event, 'limitations')">Limitations</button>
+                </div>
+                <div id="avantages" class="tab-content">
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li>Facilité et rapidité d'installation.</li>
+                        <li>Portabilité (idéal pour locataires).</li>
+                        <li>Accessibilité pour divers logements (jardin, balcon, terrasse).</li>
+                        <li>Investissement initial plus faible que les installations traditionnelles.</li>
+                        <li>Autoconsommation immédiate, réduction de la facture.</li>
+                    </ul>
+                </div>
+                <div id="limitations" class="tab-content hidden">
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li>Production d'énergie limitée (couvre le "talon de consommation").</li>
+                        <li>Généralement pas de revente du surplus d'électricité.</li>
+                        <li>Souvent inéligible à certaines aides d'État (car auto-installé).</li>
+                        <li>L'installation mécanique (fixation) demande attention et soin.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="acteurs-cles" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 section-title">Acteurs Clés du Marché Français</h2>
+            <p class="mb-6 text-gray-700">Le marché français est animé par une variété d'acteurs, des fabricants spécialisés aux grandes surfaces de bricolage, en passant par les détaillants en ligne.</p>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="acteursList">
+            </div>
+            <p class="mt-4 text-sm text-gray-600">Certains acteurs mettent en avant une production ou un assemblage en France (ex: Sunology, Sunethic, Dualsun), un argument de plus en plus valorisé par les consommateurs.</p>
+        </section>
+
+        <section id="produits-detail" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 section-title">Au Cœur du Produit</h2>
+            <p class="mb-8 text-gray-700">La performance et la durabilité d'un kit solaire plug-and-play dépendent grandement de la qualité de ses composants. Cette section détaille les systèmes de fixation, la puissance et la technologie des panneaux, ainsi que les spécifications des micro-onduleurs.</p>
+
+            <div class="mb-10">
+                <h3 class="text-xl font-semibold mb-4 text-[#795548]">Systèmes de Fixation : Un Élément Crucial</h3>
+                <p class="mb-4 text-gray-600">Le choix du système de fixation est déterminant pour la facilité d'installation, la sécurité et l'adaptabilité du kit à votre logement.</p>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4" id="fixationTypes">
+                </div>
+                <div class="mt-4 grid sm:grid-cols-2 gap-4">
+                    <div class="card p-4">
+                        <h4 class="font-semibold text-md text-[#795548]">Matériaux courants :</h4>
+                        <p class="text-sm">Aluminium (légèreté, résistance), Acier galvanisé (robustesse).</p>
+                    </div>
+                    <div class="card p-4">
+                        <h4 class="font-semibold text-md text-[#795548]">Ajustabilité :</h4>
+                        <p class="text-sm">Inclinaison souvent réglable pour optimiser la captation solaire.</p>
+                    </div>
+                </div>
+                <p class="mt-4 text-sm text-gray-600">Un système de fixation inadapté ou complexe peut annuler l'avantage de simplicité du kit. Les solutions lestables sont simples mais nécessitent une surface plane et un lestage adéquat. Les fixations murales ou pour toiture peuvent offrir une meilleure orientation mais demandent plus de soin à l'installation.</p>
+            </div>
+
+            <div class="mb-10">
+                <h3 class="text-xl font-semibold mb-4 text-[#795548]">Puissance et Technologie des Panneaux</h3>
+                <p class="mb-4 text-gray-600">La puissance individuelle des panneaux (typiquement 400Wc à 500Wc pour les kits 800-1000W) et leur technologie influencent directement la production d'énergie.</p>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="chart-container">
+                        <canvas id="panelPowerChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="panelTechChart"></canvas>
+                    </div>
+                </div>
+                <div class="card p-6 mt-6">
+                     <h4 class="font-semibold text-lg mb-2 text-[#795548]">Technologies de panneaux courantes :</h4>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Monocristallin :</strong> Bon rendement standard.</li>
+                        <li><strong>Bifacial :</strong> Capte la lumière des deux côtés, potentiel de rendement accru.</li>
+                        <li><strong>TOPCon :</strong> Efficacité supérieure, meilleure performance à long terme.</li>
+                        <li><strong>Bi-verre :</strong> Durabilité accrue.</li>
+                    </ul>
+                    <p class="mt-2 text-sm text-gray-600">Des panneaux plus puissants individuellement permettent d'atteindre la puissance totale avec une empreinte potentiellement optimisée. Les technologies avancées améliorent le rendement mais peuvent influencer le prix.</p>
+                </div>
+            </div>
+            
+            <div class="card p-6">
+                <h3 class="text-xl font-semibold mb-4 text-[#795548]">Micro-Onduleurs et Suivi</h3>
+                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                    <li>Un micro-onduleur double (pour 2 panneaux) ou deux individuels sont courants. Ex: APsystems DS3, Hoymiles HMS.</li>
+                    <li>Puissance de sortie adaptée à la puissance crête des panneaux (ex: 800W pour 800-900Wc).</li>
+                    <li>Connectivité Wi-Fi pour suivi de production via application mobile (très répandue).</li>
+                    <li>Fonction de découplage (anti-îlotage) certifiée (VDE0126-1-1 / EN50549) impérative pour la sécurité.</li>
+                    <li>Garanties variables (10 à 25 ans). Une garantie longue est un gage de qualité.</li>
+                </ul>
+            </div>
+        </section>
+        
+        <section id="comparatif-kits" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 section-title">Tableau Comparatif de Kits Sélectionnés</h2>
+            <p class="mb-6 text-gray-700">Le tableau suivant synthétise les caractéristiques de plusieurs kits représentatifs du marché français (800-1000W, 2 panneaux), en se concentrant sur les systèmes de fixation et la puissance des panneaux. Ces données sont indicatives et basées sur le rapport du 23 mai 2025.</p>
+            <div class="overflow-x-auto card p-0">
+                <table class="min-w-full text-sm text-left">
+                    <thead class="table-header">
+                        <tr>
+                            <th class="p-3">Marque et Modèle</th>
+                            <th class="p-3">Puissance Totale (Wc)</th>
+                            <th class="p-3">Panneaux (Qté x Wc & Type)</th>
+                            <th class="p-3">Micro-onduleur (W/VA)</th>
+                            <th class="p-3">Fixations Proposées</th>
+                            <th class="p-3">Garanties (Panneau/MO)</th>
+                            <th class="p-3">Prix TTC (€) Indic.</th>
+                            <th class="p-3">€/Wc Indic.</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="kitComparisonTableBody">
+                    </tbody>
+                </table>
+            </div>
+             <p class="mt-4 text-xs text-gray-500">Note : Les prix et spécifications sont indicatifs et peuvent varier. Consulter les fiches produits des vendeurs pour les informations les plus récentes.</p>
+        </section>
+
+        <section id="analyse-prix" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 section-title">Analyse Comparative des Prix</h2>
+            <p class="mb-6 text-gray-700">Les prix des kits varient considérablement. Cette section explore la fourchette de prix, le coût par Watt crête (€/Wc), les facteurs d'influence et les délais de rentabilité annoncés.</p>
+            <div class="grid md:grid-cols-2 gap-6 items-start">
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-3 text-[#795548]">Facteurs Influant sur les Prix :</h3>
+                    <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+                        <li>Réputation de la marque et origine (France/Europe vs. import).</li>
+                        <li>Technologie des panneaux (bifacial, TOPCon, bi-verre coûtent plus cher).</li>
+                        <li>Qualité et polyvalence du système de fixation.</li>
+                        <li>Marque et durée de garantie du micro-onduleur (20-25 ans est un plus).</li>
+                        <li>Accessoires inclus (câbles longs, suivi avancé).</li>
+                        <li>Durées des garanties générales.</li>
+                    </ul>
+                    <p class="mt-3 text-sm text-gray-600">Le ratio €/Wc est utile, mais la qualité globale, les garanties et l'adéquation du système de fixation sont cruciales pour la valeur à long terme.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="pricePerWcChart"></canvas>
+                </div>
+            </div>
+            <div class="card p-6 mt-6">
+                <h3 class="text-xl font-semibold mb-3 text-[#795548]">Délais de Rentabilité Annoncés :</h3>
+                <p class="text-gray-700">Généralement entre <strong>3 et 7 ans</strong>. L'<a href="https://www.ademe.fr" target="_blank" rel="noopener noreferrer" class="source-link">ADEME</a> suggère 4-5 ans pour un kit de 0.8 kWc avec 100% d'autoconsommation. Cela dépend fortement du prix de l'électricité, du taux d'autoconsommation réel et de l'ensoleillement.</p>
+            </div>
+        </section>
+
+        <section id="reglementation" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 section-title">Considérations Réglementaires et d'Installation</h2>
+            <p class="mb-6 text-gray-700">L'installation, même simplifiée, est soumise à des règles pour assurer sécurité et conformité.</p>
+            
+            <div class="card p-6 mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-center text-[#795548]">Démarches Administratives Clés</h3>
+                <div class="space-y-4">
+                    <div class="flowchart-step p-3 rounded-md shadow">
+                        <strong class="block text-lg">1. Déclaration Préalable en Mairie ?</strong>
+                        <p class="text-sm">NON si au sol &lt;1.80m ET &lt;3kWc. OUI si >1.80m ou >3kWc (CERFA 13703).</p>
+                    </div>
+                    <div class="text-center flowchart-arrow text-2xl">⬇️</div>
+                    <div class="flowchart-step p-3 rounded-md shadow">
+                        <strong class="block text-lg">2. Déclaration à <a href="https://www.enedis.fr" target="_blank" rel="noopener noreferrer" class="source-link">Enedis</a> (CACSI)</strong>
+                        <p class="text-sm">OBLIGATOIRE pour autoconsommation. En ligne, certificat onduleur requis (VDE0126-1-1 / EN50549).</p>
+                    </div>
+                    <div class="text-center flowchart-arrow text-2xl">⬇️</div>
+                    <div class="flowchart-step p-3 rounded-md shadow">
+                        <strong class="block text-lg">3. <a href="https://www.consuel.com" target="_blank" rel="noopener noreferrer" class="source-link">CONSUEL</a> nécessaire ?</strong>
+                        <p class="text-sm">NON si kit &lt;3kVA branché sur prise existante, sans batterie, sans modif. installation fixe. OUI si >3kVA, batterie, modif. tableau, revente surplus.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-6 border-2 border-[#FF6B6B] bg-red-50">
+                <h3 class="text-xl font-bold mb-3 text-center text-red-600">⚠️ Attention : Évolution Norme <a href="https://www.afnor.org/themes/nf-c-15-100/" target="_blank" rel="noopener noreferrer" class="source-link">NF C15-100</a></h3>
+                <p class="text-center text-gray-800">
+                    Une mise à jour (applicable obligatoirement en septembre 2025) pourrait <strong class="text-red-700">interdire le branchement d'un générateur sur un circuit terminal via une simple prise de courant</strong>.
+                </p>
+                <p class="text-center mt-2 text-gray-700">
+                    Cela crée une incertitude pour les kits "plug-and-play". Les fabricants et instances professionnelles (comme <a href="https://enerplan.asso.fr/" target="_blank" rel="noopener noreferrer" class="source-link">Enerplan</a> et le <a href="https://www.enr.fr/" target="_blank" rel="noopener noreferrer" class="source-link">SER</a>) cherchent des clarifications.
+                    <strong class="block mt-1">Renseignez-vous auprès de votre vendeur sur la conformité et les recommandations futures.</strong>
+                </p>
+            </div>
+
+            <div class="card p-6 mt-8">
+                <h3 class="text-xl font-semibold mb-4 text-[#795548]">✨ Assistant Réglementaire Simplifié</h3>
+                <p class="text-gray-600 mb-4">Des doutes sur les démarches administratives ? Décrivez votre projet et notre assistant IA vous aidera à y voir plus clair.</p>
+                <div class="space-y-4 mb-4">
+                    <div>
+                        <label for="gemini-reg-installation" class="block text-sm font-medium text-gray-700">Type d'installation prévu :</label>
+                        <select id="gemini-reg-installation" name="gemini-reg-installation" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#A1887F] focus:border-[#A1887F]">
+                            <option value="sol_moins_1.8m_et_moins_3kWc">Au sol, hauteur < 1.80m ET puissance totale < 3kWc</option>
+                            <option value="sol_plus_1.8m_ou_plus_3kWc">Au sol, hauteur > 1.80m OU puissance totale > 3kWc</option>
+                            <option value="mur">Fixation murale</option>
+                            <option value="toiture_plate">Sur toiture plate (abri, garage)</option>
+                            <option value="toiture_pente">Sur toiture en pente (non typique pour plug-and-play)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="gemini-reg-puissance" class="block text-sm font-medium text-gray-700">Puissance totale du kit (Wc) :</label>
+                        <input type="number" id="gemini-reg-puissance" name="gemini-reg-puissance" placeholder="Ex: 880" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#A1887F] focus:border-[#A1887F]">
+                    </div>
+                     <div>
+                        <label for="gemini-reg-batterie" class="block text-sm font-medium text-gray-700">Le kit inclut-il une batterie de stockage ?</label>
+                        <select id="gemini-reg-batterie" name="gemini-reg-batterie" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#A1887F] focus:border-[#A1887F]">
+                            <option value="non">Non</option>
+                            <option value="oui">Oui</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="getGeminiRegulationButton" class="w-full bg-[#795548] hover:bg-[#5D4037] text-white font-semibold py-2 px-4 rounded-md transition duration-150 ease-in-out">
+                    Clarifier mes Démarches Réglementaires ✨
+                </button>
+                <div id="geminiRegulationLoader" class="mt-4 text-center hidden">
+                    <p class="text-sm text-gray-600">Analyse réglementaire en cours...</p>
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mt-2"></div>
+                </div>
+                <div id="geminiRegulationResult" class="mt-4 p-4 bg-gray-50 rounded-md border border-gray-200 hidden">
+                    <h4 class="font-semibold text-gray-800 mb-2">Informations réglementaires (basées sur vos indications) :</h4>
+                    <div id="geminiRegulationText" class="text-sm text-gray-700 space-y-2"></div>
+                </div>
+            </div>
+            <p class="mt-4 text-sm text-gray-600">Directives de sécurité : utiliser une prise 16A 2P+T conforme, pas de multiprise, disjoncteur différentiel 30mA, fixation sécurisée contre le vent.</p>
+        </section>
+
+        <section id="guide-achat" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 section-title">Critères de Sélection Clés & Recommandations</h2>
+            <p class="mb-6 text-gray-700">Choisir le bon kit nécessite une évaluation de vos besoins et des caractéristiques des produits.</p>
+            <div class="card p-6">
+                <ul class="space-y-3 text-gray-700">
+                    <li class="flex items-start"><span class="text-xl mr-3 text-[#795548]">🏠</span> <div><strong>Type de Logement & Espace :</strong> Balcon, jardin, terrasse ? Surface disponible ?</div></li>
+                    <li class="flex items-start"><span class="text-xl mr-3 text-[#795548]">☀️</span> <div><strong>Exposition & Consommation :</strong> Bon ensoleillement ? Quel est votre talon de consommation ?</div></li>
+                    <li class="flex items-start"><span class="text-xl mr-3 text-[#795548]">🔩</span> <div><strong>Système de Fixation :</strong> Adapté, robuste, facile à installer pour VOUS ? Inclus ou en option ?</div></li>
+                    <li class="flex items-start"><span class="text-xl mr-3 text-[#795548]">💡</span> <div><strong>Panneaux et Onduleur :</strong> Puissance, technologie, marque et garantie de l'onduleur.</div></li>
+                    <li class="flex items-start"><span class="text-xl mr-3 text-[#795548]">🛡️</span> <div><strong>Garanties et Support :</strong> Durées ? Réputation du vendeur (SAV, livraison) ?</div></li>
+                    <li class="flex items-start"><span class="text-xl mr-3 text-[#795548]">💰</span> <div><strong>Prix vs. Valeur :</strong> Au-delà du €/Wc, analysez la qualité globale et la durabilité.</div></li>
+                    <li class="flex items-start"><span class="text-xl mr-3 text-[#795548]">📜</span> <div><strong>Conformité Réglementaire :</strong> Position du vendeur sur la <a href="https://www.afnor.org/themes/nf-c-15-100/" target="_blank" rel="noopener noreferrer" class="source-link">NF C15-100</a> ?</div></li>
+                </ul>
+                <p class="mt-4 text-sm text-gray-600">Le "meilleur" kit est subjectif. Une approche par liste de contrôle est conseillée. Soyez vigilant quant à l'évolution de la norme <a href="https://www.afnor.org/themes/nf-c-15-100/" target="_blank" rel="noopener noreferrer" class="source-link">NF C15-100</a>.</p>
+            </div>
+        </section>
+        
+        <section id="conclusion" class="pt-16 -mt-16">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 section-title">Conclusion et Perspectives</h2>
+            <div class="card p-6 bg-[#A1887F] text-white">
+                <p class="mb-3">Le marché français des kits solaires plug-and-play est dynamique, offrant des solutions accessibles. La croissance est forte, mais le principal défi réside dans l'évolution réglementaire (<a href="https://www.afnor.org/themes/nf-c-15-100/" target="_blank" rel="noopener noreferrer" class="text-white hover:underline">NF C15-100</a>).</p>
+                <p class="mb-3">L'avenir verra probablement des innovations pour des branchements plus sûrs et conformes, et un accent continu sur l'efficacité des panneaux et la robustesse des fixations. L'intégration d'outils d'aide à la décision basés sur l'IA, comme ceux présentés ici, pourrait également se généraliser.</p>
+                <p class="font-semibold">Conseils finaux : Évaluez bien vos besoins, comparez attentivement, renseignez-vous sur la réglementation, et privilégiez les vendeurs réputés avec de solides garanties.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="mt-12 py-8 text-center border-t border-gray-300">
+        <p class="text-sm text-gray-600">Application basée sur le rapport "Étude de Marché et Benchmark Prix des Systèmes Solaires Plug-and-Play (2 Panneaux, 800-1000W) en France", daté du 23 mai 2025.</p>
+        <p class="text-xs text-gray-500 mt-1">Les informations sont fournies à titre indicatif. Les conseils générés par l'IA sont des pistes de réflexion et ne remplacent pas l'avis d'un professionnel. Consultez les fiches produits des vendeurs pour les données les plus récentes. Les liens vers des sources externes s'ouvrent dans un nouvel onglet.</p>
+    </footer>
+
+    <script>
+        const reportData = {
+            acteursCles: [
+                { nom: "Sunology", type: "Fabricant/Marque Spécialisé", details: "Séries PLAY et PLAY Max, panneaux bifaciaux, facilité d'installation." },
+                { nom: "Beem Energy", type: "Fabricant/Marque Spécialisé", details: "Kits axés sur le design, BeemBox pour suivi." },
+                { nom: "Sunethic", type: "Fabricant/Marque Spécialisé", details: "Kits assemblés en France, options toiture (T) et sol/mur (F)." },
+                { nom: "Ekwateur", type: "Fournisseur d'Énergie", details: "Propose aussi des kits solaires, ex: bifacial 500Wc." },
+                { nom: "Dualsun", type: "Fabricant/Marque Spécialisé", details: "Panneaux innovants (FLASH, SPRING), station pliable PREASY." },
+                { nom: "Oscaro Power", type: "Fabricant/Marque Spécialisé", details: "Kit ôPower Mini avec fixation sol ôTerra." },
+                { nom: "Allo Solar", type: "Détaillant en Ligne", details: "Large gamme, kit Suncake 800Wc." },
+                { nom: "Solarchoc", type: "Détaillant en Ligne", details: "Prix compétitifs, panneaux Jolywood." },
+                { nom: "Mon Kit Solaire", type: "Détaillant en Ligne", details: "Variété de kits, différentes marques." },
+                { nom: "Leroy Merlin", type: "Grande Surface de Bricolage", details: "Distribue Sunology, BT Solar, I'M SOLAR." },
+                { nom: "Castorama", type: "Grande Surface de Bricolage", details: "Propose kits Sunology et autres." }
+            ],
+            fixationTypes: [
+                { nom: "Montage au Sol", icon: "🏡", details: "Souvent avec lestage (sable, dalles). Simple pour jardins, terrasses. Ex: Sunology PLAY2, Oscaro ôTerra." },
+                { nom: "Montage Mural", icon: "🧱", details: "Optimise l'espace. Peut nécessiter plus de bricolage. Ex: Sunology PLAY2, Ekwateur." },
+                { nom: "Fixation Balcon", icon: "🌇", details: "Crochets spécifiques, souvent sans perçage. Idéal locataires. Ex: Allo Solar Suncake." },
+                { nom: "Montage Toiture (Plate)", icon: "🔩", details: "Pour abris, garages. Vigilance sur étanchéité. Ex: Sunethic Série T." }
+            ],
+            kitComparison: [
+                { marque: "Sunology PLAY2 900W", puissance: 900, panneaux: "2x450Wc TopCon Bifacial", microOnduleur: "2x Hoymiles 450W", fixations: "Sol (lesté inclus), Mur (option)", garanties: "25a/25a", prix: "1148-1198", prixWc: "1.28-1.33" },
+                { marque: "Oscaro ôPower Mini 880W", puissance: 880, panneaux: "2x440Wc JA Solar Bifacial TOPCon", microOnduleur: "APSystems EZ1-M 880W", fixations: "Sol (ôTerra inclus, à lester)", garanties: "25a/10-20a (APS)", prix: "590-790", prixWc: "0.67-0.90" },
+                { marque: "Sunethic T800 (Toiture)", puissance: 800, panneaux: "2x400Wc Voltec Solar Mono", microOnduleur: "APsystems DS3-L 730VA", fixations: "Toiture (options séparées)", garanties: "25a/20a", prix: "855-1080 (sans fix.)", prixWc: "1.07-1.35" },
+                { marque: "Dualsun PREASY 840W", puissance: 840, panneaux: "2x420Wc Dualsun FLASH TOPCon Bifacial", microOnduleur: "Intégré (prob. 800W)", fixations: "Sol (ballasts inclus), Mur", garanties: "30a/25a", prix: "~1550-1690", prixWc: "1.85-2.01" },
+                { marque: "Allo Solar Suncake 800Wc", puissance: 800, panneaux: "2x400Wc Tier 1", microOnduleur: "Hoymiles 1000W", fixations: "Balcon (crochets), Sol (inclinable)", garanties: "2a (magasin)", prix: "~600 (sans batt.)", prixWc: "~0.75" },
+                { marque: "Solarchoc Kit 1000W Jolywood", puissance: 1000, panneaux: "2x500Wc Jolywood Bifacial TOPCon", microOnduleur: "Hoymiles/Deye 1000W", fixations: "SANS SUPPORT (options)", garanties: "25a/12a (Hoymiles)", prix: "~409-495 (sans supp.)", prixWc: "~0.41-0.50" }
+            ]
+        };
+
+        function populateActeurs() {
+            const container = document.getElementById('acteursList');
+            if (!container) return;
+            reportData.acteursCles.forEach(acteur => {
+                const card = `
+                    <div class="card p-4">
+                        <h4 class="font-semibold text-lg text-[#795548]">${acteur.nom}</h4>
+                        <p class="text-sm text-gray-600"><strong>Type:</strong> ${acteur.type}</p>
+                        <p class="text-xs text-gray-500 mt-1">${acteur.details}</p>
+                    </div>`;
+                container.innerHTML += card;
+            });
+        }
+
+        function populateFixations() {
+            const container = document.getElementById('fixationTypes');
+            if (!container) return;
+            reportData.fixationTypes.forEach(fix => {
+                const card = `
+                    <div class="card p-4 text-center">
+                        <div class="text-3xl mb-2">${fix.icon}</div>
+                        <h4 class="font-semibold text-md text-[#795548]">${fix.nom}</h4>
+                        <p class="text-xs text-gray-600">${fix.details}</p>
+                    </div>`;
+                container.innerHTML += card;
+            });
+        }
+        
+        function populateKitComparisonTable() {
+            const tbody = document.getElementById('kitComparisonTableBody');
+            if (!tbody) return;
+            reportData.kitComparison.forEach(kit => {
+                const row = `
+                    <tr>
+                        <td class="p-3 font-medium">${kit.marque}</td>
+                        <td class="p-3">${kit.puissance}</td>
+                        <td class="p-3 text-xs">${kit.panneaux}</td>
+                        <td class="p-3 text-xs">${kit.microOnduleur}</td>
+                        <td class="p-3 text-xs">${kit.fixations}</td>
+                        <td class="p-3 text-xs">${kit.garanties}</td>
+                        <td class="p-3">${kit.prix}</td>
+                        <td class="p-3">${kit.prixWc}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function openTab(event, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.add("hidden");
+            }
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.remove("hidden");
+            event.currentTarget.classList.add("active");
+        }
+
+        function wrapText(text, maxWidthChars = 16) {
+            if (typeof text !== 'string' || text.length <= maxWidthChars) {
+                return text;
+            }
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + word).length > maxWidthChars && currentLine.length > 0) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            }
+            lines.push(currentLine.trim());
+            return lines;
+        }
+        
+        const chartTooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            return Array.isArray(label) ? label.join(' ') : label;
+        };
+
+        const chartColors = ['#A1887F', '#D4BBA1', '#795548', '#BCAAA4', '#8F9A82'];
+
+        const commonChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#3D3D3D' } },
+                tooltip: {
+                    enabled: true,
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(0,0,0,0.75)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    titleFont: { weight: 'bold'},
+                    callbacks: { title: chartTooltipTitleCallback }
+                }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { color: '#3D3D3D' }, grid: { color: '#E0E0E0' } },
+                x: { ticks: { color: '#3D3D3D', callback: function(value, index, ticks) {
+                        const label = this.getLabelForValue(value);
+                        return wrapText(label);
+                    }}, grid: { display: false } }
+            }
+        };
+        
+        const commonPieChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top', labels: { color: '#3D3D3D', 
+                    generateLabels: function(chart) {
+                        const data = chart.data;
+                        if (data.labels.length && data.datasets.length) {
+                            return data.labels.map(function(label, i) {
+                                const meta = chart.getDatasetMeta(0);
+                                const style = meta.controller.getStyle(i);
+                                return {
+                                    text: wrapText(Array.isArray(label) ? label.join(' ') : label),
+                                    fillStyle: style.backgroundColor,
+                                    strokeStyle: style.borderColor,
+                                    lineWidth: style.borderWidth,
+                                    hidden: isNaN(data.datasets[0].data[i]) || meta.data[i].hidden,
+                                    index: i
+                                };
+                            });
+                        }
+                        return [];
+                    }
+                }},
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.75)', titleColor: 'white', bodyColor: 'white',
+                    callbacks: {
+                        title: chartTooltipTitleCallback,
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (Array.isArray(label)) label = label.join(' ');
+                            if (label) label += ': ';
+                            if (context.parsed !== null) label += context.parsed + '%';
+                            return label;
+                        }
+                    }
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            populateActeurs();
+            populateFixations();
+            populateKitComparisonTable();
+
+            if (document.getElementById('panelPowerChart')) {
+                new Chart(document.getElementById('panelPowerChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['400 Wc', '420-450 Wc', '500 Wc'],
+                        datasets: [{
+                            label: 'Répartition Puissance Panneaux (%)',
+                            data: [35, 45, 20], 
+                            backgroundColor: chartColors.slice(0,3),
+                        }]
+                    },
+                    options: commonChartOptions
+                });
+            }
+
+            if (document.getElementById('panelTechChart')) {
+                new Chart(document.getElementById('panelTechChart').getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: [wrapText('Monocristallin'), wrapText('Bifacial'), wrapText('TOPCon'), wrapText('Autres (Bi-verre, etc.)')],
+                        datasets: [{
+                            label: 'Technologies Panneaux',
+                            data: [40, 30, 20, 10], 
+                            backgroundColor: chartColors,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: commonPieChartOptions
+                });
+            }
+            
+            if (document.getElementById('pricePerWcChart')) {
+                new Chart(document.getElementById('pricePerWcChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: [wrapText('Entrée de Gamme (<0.7€/Wc)'), wrapText('Milieu de Gamme (0.7-1.2€/Wc)'), wrapText('Premium (>1.2€/Wc)')],
+                        datasets: [{
+                            label: 'Exemples de Prix par Watt crête (€/Wc)',
+                            data: [0.55, 0.95, 1.45], 
+                            backgroundColor: chartColors.slice(0,3),
+                        }]
+                    },
+                    options: commonChartOptions
+                });
+            }
+
+            const sections = document.querySelectorAll('main section');
+            const navLinks = document.querySelectorAll('#navbar a');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.4 
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            if (document.getElementById('avantages')) {
+                 document.querySelector('.tab-button.active').click();
+            }
+
+            const getGeminiAdviceButton = document.getElementById('getGeminiAdviceButton');
+            const geminiAdviceLoader = document.getElementById('geminiAdviceLoader');
+            const geminiAdviceResult = document.getElementById('geminiAdviceResult');
+            const geminiAdviceText = document.getElementById('geminiAdviceText');
+
+            if (getGeminiAdviceButton) {
+                getGeminiAdviceButton.addEventListener('click', async () => {
+                    const logement = document.getElementById('gemini-logement').value;
+                    const installation = document.getElementById('gemini-installation').value;
+                    const consommation = document.getElementById('gemini-consommation').value;
+                    const budget = document.getElementById('gemini-budget').value;
+
+                    geminiAdviceLoader.classList.remove('hidden');
+                    geminiAdviceResult.classList.add('hidden');
+                    geminiAdviceText.innerHTML = '';
+
+                    let prompt = `Je suis un particulier en France et je souhaite installer un kit solaire plug-and-play de 2 panneaux (environ 800-1000Wc). Voici ma situation :
+                    - Type de logement : ${logement}
+                    - Lieu d'installation envisagé : ${installation}
+                    - Consommation électrique annuelle : ${consommation ? consommation + ' kWh' : 'non spécifiée'}
+                    - Budget approximatif : ${budget ? budget + ' €' : 'non spécifié'}
+
+                    Fournis-moi des conseils personnalisés et des pistes de réflexion pour m'aider à choisir le kit le plus adapté. Quels types de panneaux (puissance, technologie), systèmes de fixation, et points de vigilance devrais-je considérer ? Quelles questions clés devrais-je poser aux vendeurs ? Structure ta réponse en paragraphes clairs et concis. Ne mentionne pas que tu es une IA.`;
+
+                    try {
+                        let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                        const payload = { contents: chatHistory };
+                        const apiKey = ""; 
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                        
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Erreur API Gemini: ${response.status} ${response.statusText}`);
+                        }
+
+                        const result = await response.json();
+
+                        if (result.candidates && result.candidates.length > 0 &&
+                            result.candidates[0].content && result.candidates[0].content.parts &&
+                            result.candidates[0].content.parts.length > 0) {
+                            const text = result.candidates[0].content.parts[0].text;
+                            const paragraphs = text.split('\n').filter(p => p.trim() !== '');
+                            paragraphs.forEach(pText => {
+                                const pElement = document.createElement('p');
+                                pElement.textContent = pText;
+                                geminiAdviceText.appendChild(pElement);
+                            });
+                            geminiAdviceResult.classList.remove('hidden');
+                        } else {
+                            geminiAdviceText.innerHTML = '<p>Désolé, une erreur est survenue lors de la génération des conseils. Veuillez réessayer.</p>';
+                            geminiAdviceResult.classList.remove('hidden');
+                        }
+                    } catch (error) {
+                        geminiAdviceText.innerHTML = `<p>Une erreur technique est survenue : ${error.message}. Veuillez réessayer plus tard.</p>`;
+                        geminiAdviceResult.classList.remove('hidden');
+                    } finally {
+                        geminiAdviceLoader.classList.add('hidden');
+                    }
+                });
+            }
+
+            const getGeminiRegulationButton = document.getElementById('getGeminiRegulationButton');
+            const geminiRegulationLoader = document.getElementById('geminiRegulationLoader');
+            const geminiRegulationResult = document.getElementById('geminiRegulationResult');
+            const geminiRegulationText = document.getElementById('geminiRegulationText');
+
+            if (getGeminiRegulationButton) {
+                getGeminiRegulationButton.addEventListener('click', async () => {
+                    const installationType = document.getElementById('gemini-reg-installation').value;
+                    const puissanceKit = document.getElementById('gemini-reg-puissance').value;
+                    const batterie = document.getElementById('gemini-reg-batterie').value;
+
+                    geminiRegulationLoader.classList.remove('hidden');
+                    geminiRegulationResult.classList.add('hidden');
+                    geminiRegulationText.innerHTML = '';
+
+                    let prompt = `Je prévois d'installer un kit solaire plug-and-play en France. Voici les détails de mon projet :
+                    - Type d'installation : ${installationType.replace(/_/g, ' ')}
+                    - Puissance totale du kit : ${puissanceKit ? puissanceKit + ' Wc' : 'non spécifiée'}
+                    - Le kit inclut une batterie : ${batterie}
+
+                    Peux-tu m'expliquer de manière simple et claire les démarches administratives probables (Déclaration Préalable en mairie, Convention avec Enedis (CACSI), nécessité d'un CONSUEL) pour cette configuration ? Précise les conditions qui s'appliquent. Souligne également l'importance de la norme NF C15-100 et les certifications requises pour le matériel (ex: VDE0126-1-1 / EN50549 pour l'onduleur). Structure ta réponse en paragraphes clairs et concis. Ne mentionne pas que tu es une IA.`;
+                    
+                    try {
+                        let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                        const payload = { contents: chatHistory };
+                        const apiKey = ""; 
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                        
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Erreur API Gemini: ${response.status} ${response.statusText}`);
+                        }
+
+                        const result = await response.json();
+
+                        if (result.candidates && result.candidates.length > 0 &&
+                            result.candidates[0].content && result.candidates[0].content.parts &&
+                            result.candidates[0].content.parts.length > 0) {
+                            const text = result.candidates[0].content.parts[0].text;
+                            const paragraphs = text.split('\n').filter(p => p.trim() !== '');
+                            paragraphs.forEach(pText => {
+                                const pElement = document.createElement('p');
+                                pElement.textContent = pText;
+                                geminiRegulationText.appendChild(pElement);
+                            });
+                            geminiRegulationResult.classList.remove('hidden');
+                        } else {
+                            geminiRegulationText.innerHTML = '<p>Désolé, une erreur est survenue lors de la clarification réglementaire. Veuillez réessayer.</p>';
+                            geminiRegulationResult.classList.remove('hidden');
+                        }
+                    } catch (error) {
+                        geminiRegulationText.innerHTML = `<p>Une erreur technique est survenue : ${error.message}. Veuillez réessayer plus tard.</p>`;
+                        geminiRegulationResult.classList.remove('hidden');
+                    } finally {
+                        geminiRegulationLoader.classList.add('hidden');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

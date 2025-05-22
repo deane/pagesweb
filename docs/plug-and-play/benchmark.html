@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benchmark Kits Solaires Plug & Play</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices: 
+        - Report Intro -> Accueil Section -> HTML Text -> Inform.
+        - Key Components (Sec 2) -> Comprendre Section -> HTML Text & Icons -> Educate.
+        - Comparison Table (Sec 3) -> Comparateur Section -> Interactive HTML Table + JS Filters (Power, Panels, Fixation, Brand) + Chart.js Bar (Kits by Power) & Pie (Kits by Brand) -> Compare, Explore, Visualize Trends.
+        - Buyer Checklist & Scenarios (Sec 4 & 5) -> Guide d'Achat Section -> HTML Text & Clickable JS Toggles -> Guide, Advise.
+        - Report Conclusion (Sec 6) -> Conclusion Section -> HTML Text -> Summarize.
+        - All interactions via Vanilla JS. Chart.js for visualizations.
+    -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .nav-link { transition: all 0.3s ease; }
+        .nav-link.active { color: #D97706; border-bottom-color: #D97706; font-weight: 600; }
+        .nav-link:not(.active):hover { color: #F59E0B; border-bottom-color: #F59E0B; }
+        .kit-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: white;
+        }
+        .table-responsive {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            vertical-align: middle;
+            border-bottom-width: 1px;
+            border-color: #e5e7eb; /* gray-200 */
+        }
+        thead th {
+            background-color: #f9fafb; /* gray-50 */
+            font-weight: 600;
+        }
+         /* Custom scrollbar for webkit browsers */
+        .table-responsive::-webkit-scrollbar {
+            height: 8px;
+        }
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #c7c7c7;
+            border-radius: 10px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #a3a3a3;
+        }
+    </style>
+</head>
+<body class="bg-amber-50 text-stone-800">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-amber-600">☀️ Kits Solaires Faciles</span>
+                </div>
+                <nav class="hidden md:flex space-x-4" id="desktop-nav">
+                    <a href="#accueil" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-stone-700 border-b-2 border-transparent">Accueil</a>
+                    <a href="#comprendre" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-stone-700 border-b-2 border-transparent">Comprendre les Kits</a>
+                    <a href="#comparateur" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-stone-700 border-b-2 border-transparent">Comparateur</a>
+                    <a href="#guide" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-stone-700 border-b-2 border-transparent">Guide d'Achat</a>
+                    <a href="#conclusion" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-stone-700 border-b-2 border-transparent">Conclusion</a>
+                </nav>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-stone-700 hover:text-amber-600 focus:outline-none focus:text-amber-600">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden hidden bg-white shadow-lg">
+            <a href="#accueil" class="block nav-link px-3 py-2 text-base font-medium text-stone-700 hover:bg-amber-100">Accueil</a>
+            <a href="#comprendre" class="block nav-link px-3 py-2 text-base font-medium text-stone-700 hover:bg-amber-100">Comprendre les Kits</a>
+            <a href="#comparateur" class="block nav-link px-3 py-2 text-base font-medium text-stone-700 hover:bg-amber-100">Comparateur</a>
+            <a href="#guide" class="block nav-link px-3 py-2 text-base font-medium text-stone-700 hover:bg-amber-100">Guide d'Achat</a>
+            <a href="#conclusion" class="block nav-link px-3 py-2 text-base font-medium text-stone-700 hover:bg-amber-100">Conclusion</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <section id="accueil" class="pt-16 -mt-16 mb-12 min-h-screen bg-white p-6 rounded-lg shadow">
+            <h1 class="text-3xl sm:text-4xl font-bold text-amber-600 mb-6">Adopter l'Énergie Solaire en Toute Simplicité</h1>
+            <p class="mb-4 text-lg">Bienvenue sur notre guide interactif des kits solaires plug and play ! Cette application est conçue pour vous aider à naviguer dans le monde de l'autoconsommation solaire et à choisir le système qui correspond le mieux à vos besoins et à votre habitation. Découvrez comment produire votre propre électricité, réduire vos factures et contribuer à la transition écologique, le tout avec une installation simplifiée.</p>
+            <h2 class="text-2xl font-semibold text-amber-600 mb-3">Qu'est-ce qu'un Kit Solaire Plug and Play ?</h2>
+            <p class="mb-4">Les kits solaires "plug and play" représentent une avancée significative pour rendre l'énergie solaire accessible au grand public. Conçus pour une installation facile, réalisable par les particuliers eux-mêmes (Do It Yourself - DIY), ces systèmes permettent de produire sa propre électricité et de la consommer instantanément en les branchant simplement sur une prise de courant domestique standard. Cette simplicité d'utilisation démocratise l'autoconsommation énergétique.</p>
+            <p class="mb-4">Pour les consommateurs français, les avantages sont multiples : une réduction notable des factures d'électricité, une plus grande indépendance énergétique vis-à-vis des fournisseurs traditionnels, et une contribution active à la transition écologique. De plus, pour les installations de petite taille, les démarches administratives sont souvent allégées, ce qui lève un frein important à l'adoption du solaire.</p>
+             <div class="mt-8 p-6 bg-amber-100 rounded-lg">
+                <h3 class="text-xl font-semibold text-amber-700 mb-2">Objectif de cette application</h3>
+                <p>Cette application vise à simplifier votre processus de sélection en se concentrant sur des kits solaires plug and play avec un ou deux panneaux, une puissance totale jusqu'à 1000W, un micro-onduleur, et des options de fixation pour sol, balcon ou mur. Explorez, comparez et faites un choix éclairé !</p>
+            </div>
+        </section>
+
+        <section id="comprendre" class="pt-16 -mt-16 mb-12 min-h-screen bg-white p-6 rounded-lg shadow">
+            <h1 class="text-3xl sm:text-4xl font-bold text-amber-600 mb-6">Décoder Votre Kit Solaire</h1>
+            <p class="mb-6 text-lg">Avant de comparer les offres, il est essentiel de comprendre les éléments clés d'un kit solaire plug and play et les critères qui influencent leur performance.</p>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-amber-50 p-6 rounded-lg">
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-3">🔌 Panneaux Solaires : Le Cœur du Système</h2>
+                    <p class="mb-2">Les panneaux transforment la lumière du soleil en électricité. Points clés :</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Types de Cellules :</strong>
+                            <ul class="list-disc list-inside ml-4">
+                                <li><em>Monocristallin :</em> Souvent noirs, rendement supérieur, idéal pour espaces limités. La technologie PERC améliore la capture de lumière.</li>
+                                <li><em>Bifacial :</em> Captent la lumière des deux côtés (avant et arrière via réflexion). Gain de production de 5% à 25%.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Puissance (Wc/Wp) :</strong> Puissance maximale en conditions standard. Pour ce comparatif : 1 panneau (300-500Wc), 2 panneaux (800-1000Wc).</li>
+                        <li><strong>Nombre de Panneaux :</strong> 1 ou 2, influençant puissance totale et encombrement.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-amber-50 p-6 rounded-lg">
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-3">💡 Micro-Onduleurs : Conversion Intelligente</h2>
+                    <p class="mb-2">Crucial pour convertir le courant continu (DC) des panneaux en courant alternatif (AC) 230V utilisable.</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Chaque panneau (ou paire) a souvent son micro-onduleur, optimisant la production (l'ombrage sur un panneau n'affecte pas les autres).</li>
+                        <li>Simplifie l'installation par rapport aux onduleurs centraux.</li>
+                        <li>Marques courantes : APsystems, Zendure, Hoymiles, HyxiPower, Enphase, TSUN.</li>
+                        <li>Fonctionnalités : Suivi de production via Wi-Fi/Bluetooth (app mobile).</li>
+                    </ul>
+                </div>
+
+                <div class="bg-amber-50 p-6 rounded-lg">
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-3">🔩 Systèmes de Fixation : Stabilité et Orientation</h2>
+                    <p class="mb-2">Déterminant pour la sécurité, facilité d'installation et performance (inclinaison/orientation).</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Fixation au Sol :</strong> Châssis à lester ou supports pour surface plane (jardin, terrasse). Inclinaison parfois réglable.</li>
+                        <li><strong>Fixation Balcon :</strong> Supports spécifiques (équerres, sangles). Sécurité et conformité copropriété primordiales.</li>
+                        <li><strong>Fixation Murale :</strong> Équerres ou rails pour façade verticale.</li>
+                        <li>Vérifier si incluse ou en option (et son coût).</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-amber-50 p-6 rounded-lg">
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-3">⚡ Puissance et Production</h2>
+                     <p class="mb-2">Ne pas confondre :</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Watt-crête (Wc/Wp) :</strong> Puissance maximale potentielle du panneau en conditions idéales.</li>
+                        <li><strong>Kilowattheures (kWh) :</strong> Énergie réellement produite sur une période. Dépend de la puissance, localisation, orientation, météo, ombrage.</li>
+                    </ul>
+                    <p class="mt-2">Certains fabricants proposent des écosystèmes complets (batteries, gestion intelligente) pour une évolution future.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="comparateur" class="pt-16 -mt-16 mb-12 min-h-screen bg-white p-6 rounded-lg shadow">
+            <h1 class="text-3xl sm:text-4xl font-bold text-amber-600 mb-6">Comparateur de Kits Solaires</h1>
+            <p class="mb-6 text-lg">Utilisez les filtres ci-dessous pour affiner la liste des kits solaires et trouver celui qui correspond à vos critères. Le tableau présente les informations clés pour une comparaison directe. Cliquez sur le nom d'un kit pour plus de détails (fonctionnalité à venir).</p>
+
+            <div class="bg-amber-50 p-4 sm:p-6 rounded-lg mb-6 shadow">
+                <h2 class="text-xl font-semibold text-amber-700 mb-4">Filtres</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label for="filter-power" class="block text-sm font-medium text-stone-700">Puissance Totale (Wc)</label>
+                        <select id="filter-power" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm rounded-md">
+                            <option value="all">Toutes</option>
+                            <option value="0-400">0-400 Wc</option>
+                            <option value="401-600">401-600 Wc</option>
+                            <option value="601-800">601-800 Wc</option>
+                            <option value="801-1000">801-1000 Wc</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="filter-panels" class="block text-sm font-medium text-stone-700">Nombre de Panneaux</label>
+                        <select id="filter-panels" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm rounded-md">
+                            <option value="all">Tous</option>
+                            <option value="1">1 Panneau</option>
+                            <option value="2">2 Panneaux</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="filter-fixation-type" class="block text-sm font-medium text-stone-700">Type de Fixation Principal</label>
+                        <select id="filter-fixation-type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm rounded-md">
+                            <option value="all">Tous</option>
+                            <option value="Sol">Sol</option>
+                            <option value="Balcon">Balcon</option>
+                            <option value="Mur">Mur</option>
+                            <option value="Optionnelle">Optionnelle</option>
+                            <option value="Incluse">Incluse (générique)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="filter-brand" class="block text-sm font-medium text-stone-700">Marque</label>
+                        <select id="filter-brand" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm rounded-md">
+                            <option value="all">Toutes</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="text-sm text-stone-600 mb-4"><span id="kit-count">0</span> kit(s) trouvé(s).</p>
+
+            <div class="table-responsive shadow rounded-lg mb-8">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-3 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom du Kit / Modèle</th>
+                            <th scope="col" class="px-3 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marque</th>
+                            <th scope="col" class="px-3 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Puissance Totale (Wc)</th>
+                            <th scope="col" class="px-3 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nb. Panneaux</th>
+                            <th scope="col" class="px-3 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fixation(s) Incluse(s)</th>
+                            <th scope="col" class="px-3 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix (€ TTC) Indicatif</th>
+                            <th scope="col" class="px-3 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lien</th>
+                        </tr>
+                    </thead>
+                    <tbody id="kits-table-body" class="bg-white divide-y divide-gray-200">
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 mt-12">
+                <div>
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-4">Distribution des Kits par Puissance</h2>
+                    <div class="chart-container bg-white p-4 rounded-lg shadow">
+                        <canvas id="powerChart"></canvas>
+                    </div>
+                    <p class="mt-2 text-sm text-stone-600 text-center">Ce graphique montre le nombre de kits disponibles dans différentes plages de puissance.</p>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-4">Répartition des Kits par Marque</h2>
+                    <div class="chart-container bg-white p-4 rounded-lg shadow">
+                        <canvas id="brandChart"></canvas>
+                    </div>
+                     <p class="mt-2 text-sm text-stone-600 text-center">Visualisez la part de chaque marque dans notre sélection de kits.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="guide" class="pt-16 -mt-16 mb-12 min-h-screen bg-white p-6 rounded-lg shadow">
+            <h1 class="text-3xl sm:text-4xl font-bold text-amber-600 mb-6">Guide d'Achat : Faire le Bon Choix</h1>
+            <p class="mb-6 text-lg">Avant de vous décider, plusieurs éléments méritent une réflexion approfondie pour garantir que votre investissement corresponde à vos attentes.</p>
+
+            <div class="space-y-8">
+                <div>
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-3">📋 Liste de Contrôle Avant Achat</h2>
+                    <ul class="list-disc list-inside space-y-2 bg-amber-50 p-4 rounded-lg">
+                        <li><strong>Évaluer vos besoins énergétiques (talon de consommation) :</strong> Quelle est la consommation de base de vos appareils fonctionnant en continu ?</li>
+                        <li><strong>Évaluer votre site d'installation :</strong>
+                            <ul class="list-disc list-inside ml-4">
+                                <li>Espace disponible et dégagé ?</li>
+                                <li>Orientation (idéalement Sud, Est/Ouest possible) ?</li>
+                                <li>Inclinaison optimale (réglable si possible) ?</li>
+                                <li>Absence d'ombrage ?</li>
+                            </ul>
+                        </li>
+                        <li><strong>Comprendre l'installation et la réglementation :</strong>
+                            <ul class="list-disc list-inside ml-4">
+                                <li>Aisance avec le bricolage pour l'assemblage et la fixation ?</li>
+                                <li>Outillage nécessaire ?</li>
+                                <li>Règles de copropriété (si applicable, autorisation AG) ?</li>
+                                <li>Déclaration ENEDIS (CACSI) requise ?</li>
+                                <li>Restrictions de hauteur/puissance pour démarches simplifiées ?</li>
+                            </ul>
+                        </li>
+                        <li><strong>Garantie, Support et Retours :</strong>
+                            <ul class="list-disc list-inside ml-4">
+                                <li>Durée garantie panneaux (produit et performance) ?</li>
+                                <li>Durée garantie micro-onduleur ?</li>
+                                <li>Qualité du support client (basé en France ?) ?</li>
+                                <li>Politique de retour ?</li>
+                            </ul>
+                        </li>
+                        <li><strong>Longueur du câble secteur fourni :</strong> Suffisante ? Besoin d'une rallonge adaptée et sécurisée ? Prise conforme et reliée à la terre ?</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-3">💡 Suggestions Basées sur des Scénarios</h2>
+                    <p class="mb-4">Voici quelques suggestions pour vous orienter, cliquez sur un scénario pour voir les recommandations :</p>
+                    <div id="scenarios-container" class="space-y-3">
+                        
+                    </div>
+                </div>
+                 <div>
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-3">🌍 Origine des Composants et Engagement</h2>
+                    <div class="bg-amber-50 p-4 rounded-lg">
+                        <p>L'argument du "Fabriqué en France" ou en Europe est mis en avant par plusieurs marques (Sunethic, Ekwateur, Mon Kit Solaire avec DualSun, Sunology). Cette démarche peut être associée à une empreinte carbone réduite et au soutien de l'économie locale. Pour certains, cela peut justifier un prix plus élevé si c'est un gage de qualité, de durabilité ou correspond à des valeurs éthiques.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="conclusion" class="pt-16 -mt-16 mb-12 min-h-screen bg-white p-6 rounded-lg shadow">
+            <h1 class="text-3xl sm:text-4xl font-bold text-amber-600 mb-6">Produire Votre Énergie en Toute Simplicité</h1>
+            <p class="mb-4 text-lg">Les kits solaires plug and play offrent une porte d'entrée remarquablement accessible vers l'autoconsommation d'énergie solaire. Ils permettent aux particuliers de devenir acteurs de leur transition énergétique, de réduire leur empreinte carbone et d'alléger leurs factures d'électricité avec une facilité d'installation déconcertante par rapport aux systèmes solaires traditionnels.</p>
+            <p class="mb-4">Le choix du kit idéal repose sur une adéquation fine entre vos besoins spécifiques (consommation de fond, espace disponible, type d'habitat), votre budget, et votre niveau de confort avec l'installation physique. L'analyse des différentes offres montre une diversité de solutions, allant de kits ultra-compacts pour balcons à des ensembles de deux panneaux approchant les 1000W pour des terrasses ou jardins.</p>
+            <p class="mb-4">Il est crucial de ne pas s'arrêter au prix d'appel et de considérer l'ensemble des caractéristiques : la puissance réelle, la technologie des panneaux (le bifacial étant un atout notable), la qualité et la garantie du micro-onduleur, l'inclusion et l'adaptabilité du système de fixation, ainsi que les services associés (support client, garanties). Les informations sur l'origine des composants et l'engagement des marques en matière de durabilité peuvent également peser dans la balance.</p>
+            <p class="font-semibold text-amber-700">En définitive, avant de vous lancer, prenez le temps de bien évaluer votre situation, de comparer attentivement les offres présentées dans cet outil, et surtout, de vérifier les détails techniques, les prix et la disponibilité directement auprès des vendeurs via les liens fournis. L'avenir de la production d'énergie domestique est prometteur, et ces kits solaires plug and play en sont une illustration concrète, rendant l'énergie solaire plus simple et plus proche de chacun.</p>
+        </section>
+    </main>
+
+    <footer class="bg-stone-800 text-amber-50 py-8 text-center">
+        <p>&copy; 2024 Guide Interactif des Kits Solaires Plug & Play. Informations basées sur le rapport fourni.</p>
+        <p class="text-xs mt-2">Les prix et disponibilités sont indicatifs et peuvent changer. Vérifiez toujours auprès du vendeur.</p>
+    </footer>
+
+    <script>
+        const kitsData = [
+            { name: "Kit Solaire Bifacial 870Wp", brand: "Zendure", power: 870, panels: 2, panelPower: 435, tech: "Bifacial", inverter: "Zendure EZ1-M (800W)", fixationIncluded: "Optionnelle", fixationDetails: "Options pour sol/toit plat, mur bois, balcon (achat séparé)", warranty: "15 ans / Non spécifié (MO) ; Perf. 25 ans (88.9%)", keyFeatures: "Micro-onduleur EZ1-M avec Wi-Fi/Bluetooth, puissance ajustable", price: 279.00, link: "https://fr.zendure.com/pages/kit-solaire-plug-and-play", fixationTypes: ["Sol", "Balcon", "Mur"] },
+            { name: "Kit Solaire Bifacial 1000Wp", brand: "Zendure", power: 1000, panels: 2, panelPower: 500, tech: "Bifacial", inverter: "Zendure EZ1-M (800W)", fixationIncluded: "Optionnelle", fixationDetails: "Options pour sol/toit plat, mur bois, balcon (achat séparé)", warranty: "15 ans / Non spécifié (MO) ; Perf. 25 ans (88.9%)", keyFeatures: "Micro-onduleur EZ1-M avec Wi-Fi/Bluetooth, puissance ajustable", price: 349.00, link: "https://fr.zendure.com/products/kit-solaire-plug-and-play?variant=54736578904442", fixationTypes: ["Sol", "Balcon", "Mur"] },
+            { name: "Kit solaire plug and play 500W bifacial", brand: "Kitsolaire.fr", power: 500, panels: 1, panelPower: 500, tech: "Bifacial, TopCon", inverter: "APSystems EZ1 SPE (500VA)", fixationIncluded: "Optionnelle", fixationDetails: "Sans fixation ou avec fixation (sol, mur, balcon)", warranty: "Panneau 25 ans / MO 12 ans", keyFeatures: "App AP EasyPower, câble 5m", price: 325.00, link: "https://www.kitsolaire.fr/kit-solaire-plug-and-play-500w-bifacial-_r_1435_i_6679.html", fixationTypes: ["Sol", "Balcon", "Mur"] },
+            { name: "Kit solaire plug and play 1000W bifacial", brand: "Kitsolaire.fr", power: 1000, panels: 2, panelPower: 500, tech: "Bifacial, TopCon", inverter: "APSystems EZ1 H (960VA)", fixationIncluded: "Optionnelle", fixationDetails: "Sans fixation ou avec fixation (sol, mur, balcon)", warranty: "Panneau 25 ans / MO 12 ans", keyFeatures: "App AP EasyPower, câble 5m", price: 495.00, link: "https://www.kitsolaire.fr/kit-solaire-plug-and-play-1000w-bifacial-_r_1435_i_6680.html", fixationTypes: ["Sol", "Balcon", "Mur"] },
+            { name: "Sunology CITY", brand: "Sunology", power: 300, panels: 2, panelPower: 150, tech: "Monocristallin (design noir intégral)", inverter: "Micro-onduleur (non spécifié)", fixationIncluded: "Incluse (Balcon)", fixationDetails: "Spécialement conçu pour balcon, sangles renforcées, inclinable", warranty: "Panneaux 15 ans (fab.) 25 ans (perf. 80%) / MO 25 ans", keyFeatures: "Assemblé en France, léger (4kg/panneau), app STREAM", price: 599.00, link: "https://sunology.eu/products/sunology-city-kit-solaire", fixationTypes: ["Balcon"] },
+            { name: "Sunology PLAY2 (1 station)", brand: "Sunology", power: 450, panels: 1, panelPower: 450, tech: "Monocristallin TopCon RT Bifacial (Bi-verre)", inverter: "Sunology 450W (exclusif)", fixationIncluded: "Incluse (Sol/Toit plat)", fixationDetails: "Châssis pré-fixé, lestage par ballasts (inclus), inclinable. Fixation murale en option.", warranty: "25 ans (complète)", keyFeatures: "100% assemblé, installation <1min, app STREAM, fabriqué en France", price: 599.00, link: "https://sunology.eu/products/sunology-play-kit-solaire", fixationTypes: ["Sol", "Mur"] },
+            { name: "Sunology PLAY2 (2 stations)", brand: "Sunology", power: 900, panels: 2, panelPower: 450, tech: "Monocristallin TopCon RT Bifacial (Bi-verre)", inverter: "Sunology 450W (exclusif) x2", fixationIncluded: "Incluse (Sol/Toit plat)", fixationDetails: "Comme pour 1 station PLAY2, liaison de 2 stations", warranty: "25 ans (complète)", keyFeatures: "Comme pour 1 station PLAY2", price: 1198.00, link: "https://sunology.eu/products/sunology-play-kit-solaire", fixationTypes: ["Sol", "Mur"] },
+            { name: "Kit panneau solaire plug and play 1000W DualSun", brand: "Mon Kit Solaire", power: 1000, panels: 2, panelPower: 500, tech: "DualSun FLASH Bifacial & Biverre", inverter: "TSUN TSOL-MX1000", fixationIncluded: "Optionnelle", fixationDetails: "Options pour sol, façade, toiture plate, tuiles, ardoise, bac acier, tôle ondulée (Schletter)", warranty: "Panneaux 25 ans / MO 25 ans", keyFeatures: "Panneaux marque française, câble 5m", price: 538.00, link: "https://www.monkitsolaire.fr/product/kit-solaire-plug-and-play-2-panneaux-solaires-dualsun/5085.html", fixationTypes: ["Sol", "Mur"] },
+            { name: "KIT SOLAIRE 500W BIFACIAL - PLUG&PLAY avec fixation", brand: "Kitsolaire-discount.com", power: 500, panels: 1, panelPower: 500, tech: "Bifacial Transparent N-Type", inverter: "HyxiPower HYX-M500-SW (500W)", fixationIncluded: "Incluse (Universel Sol, Terrasse, Mural, Balcon)", fixationDetails: "Fixation Universel Réglable NOIR KSOLAR", warranty: "Non spécifié", keyFeatures: "Prêt à brancher", price: 328.82, link: "https://www.kitsolaire-discount.com/kits-autoconsommation-avec-micro-onduleur/1043-kit-solaire-500w-bifacial-plugplay-avec-fixation-hyxipower.html", fixationTypes: ["Sol", "Mur", "Balcon"] },
+            { name: "KIT SOLAIRE 1000W BIFACIAL - PLUG&PLAY", brand: "Kitsolaire-discount.com", power: 1000, panels: 2, panelPower: 500, tech: "Bifacial Transparent N-Type", inverter: "HyxiPower HYX-M1000-S (1000W)", fixationIncluded: "Non spécifié comme inclus", fixationDetails: "Câble prêt à brancher", warranty: "Non spécifié", keyFeatures: "Prêt à brancher", price: 377.82, link: "https://www.kitsolaire-discount.com/kits-autoconsommation-avec-micro-onduleur/1045-kit-solaire-1000w-bifacial-plugplay-hyxipower.html", fixationTypes: [] },
+            { name: "KIT SOLAIRE 850W FULL BLACK (2x425W LONGI)", brand: "Kitsolaire-discount.com", power: 850, panels: 2, panelPower: 425, tech: "Monocristallin Full Black", inverter: "HOYMILES HMS800 2T", fixationIncluded: "Non spécifié comme inclus", fixationDetails: "Prise à brancher", warranty: "Non spécifié", keyFeatures: "Kit à monter soi-même", price: 341.98, link: "https://kitsolaire-discount.com/fr/14-kits-micro-onduleur", fixationTypes: [] },
+            { name: "Kit solaire plug and play 500Wc", brand: "Ekwateur", power: 500, panels: 1, panelPower: 500, tech: "Bifacial, Monocristallin PERC", inverter: "Intégré (non spécifié, puissance adaptée)", fixationIncluded: "Incluse (Sol, Mur, Toit plat)", fixationDetails: "Support pré-assemblé avec inclinaison réglable (27°-42°), 2 bacs à lester", warranty: "25 ans (panneau, MO, structure) ; Perf. 25 ans (85%)", keyFeatures: "Assemblé en France (Bretagne), app Smart life, câble 3m", price: 529.00, link: "https://ekwateur.fr/panneaux-solaires/kit-solaire/", fixationTypes: ["Sol", "Mur"] },
+            { name: "Beem On", brand: "Beem Energy", power: 500, panels: 1, panelPower: 500, tech: "Monocristallin TOPCON Bifacial", inverter: "Beem (450W ou adapté)", fixationIncluded: "Incluse (Sol, Mur)", fixationDetails: "Support type \"chilienne\" avec inclinaison réglable (4 positions)", warranty: "Panneau 25 ans (perf. 80%) / MO non spécifié", keyFeatures: "Design compact, app Beem Energy, câble 10m, conçu/assemblé à Nantes", price: 429.00, link: "https://beemenergy.fr/", fixationTypes: ["Sol", "Mur"] },
+            { name: "Beem Kit 420Wc", brand: "Beem Energy", power: 420, panels: 4, panelPower: 105, tech: "Monocristallin PERC", inverter: "Beem (adapté)", fixationIncluded: "Incluse (Sol, Mur)", fixationDetails: "4 supports de fixation", warranty: "Non spécifié", keyFeatures: "Beem Box (compteur Wifi), câble 10m", price: 299.00, link: "https://beemenergy.fr/", fixationTypes: ["Sol", "Mur"] }, /* Note: price is for 300Wc, 420Wc likely higher */
+            { name: "Station solaire Sunethic F450 Bifacial", brand: "Sunethic", power: 450, panels: 1, panelPower: 450, tech: "Bifacial (Voltec Solar)", inverter: "APsystems (adapté)", fixationIncluded: "Incluse (Sol, Mur, Toit plat)", fixationDetails: "Support acier galvanisé fabriqué en France, inclinable (27°-63°)", warranty: "25 ans (intégrale panneau et MO)", keyFeatures: "Panneaux fabriqués en France, app APsystems, évolutif", price: 640.00, link: "https://www.sunethic.fr/product/panneau-solaire-bifacial-450w-plug-and-play-sunethic/", fixationTypes: ["Sol", "Mur"] },
+            { name: "Station solaire Sunethic F500", brand: "Sunethic", power: 500, panels: 1, panelPower: 500, tech: "Monocristallin (Voltec Solar)", inverter: "APsystems (adapté)", fixationIncluded: "Incluse (Sol, Mur, Toit plat)", fixationDetails: "Support acier galvanisé fabriqué en France, inclinable (27°-63°)", warranty: "25 ans (intégrale panneau et MO)", keyFeatures: "Panneaux fabriqués en France, app APsystems, évolutif", price: 670.00, link: "https://www.sunethic.fr/product/station-solaire-sunethic-f500/", fixationTypes: ["Sol", "Mur"] },
+            { name: "Station solaire Sunethic F900 Bifacial", brand: "Sunethic", power: 900, panels: 2, panelPower: 450, tech: "Bifacial (Voltec Solar)", inverter: "APsystems (adapté, probablement DS3)", fixationIncluded: "Incluse (Sol, Mur, Toit plat)", fixationDetails: "2 supports acier galvanisé fabriqués en France, inclinables (27°-63°)", warranty: "25 ans (intégrale panneau et MO)", keyFeatures: "Panneaux fabriqués en France, app APsystems, évolutif", price: 1070.00, link: "https://www.sunethic.fr/product/panneau-solaire-bifacial-francais-plug-and-play-sunethic-f9000/", fixationTypes: ["Sol", "Mur"] },
+            { name: "Station solaire Sunethic F1000", brand: "Sunethic", power: 1000, panels: 2, panelPower: 500, tech: "Monocristallin (Voltec Solar)", inverter: "APsystems (adapté, probablement DS3)", fixationIncluded: "Incluse (Sol, Mur, Toit plat)", fixationDetails: "2 supports acier galvanisé fabriqués en France, inclinables (27°-63°)", warranty: "25 ans (intégrale panneau et MO)", keyFeatures: "Panneaux fabriqués en France, app APsystems, évolutif", price: 1190.00, link: "https://www.sunethic.fr/product/panneau-solaire-plug-and-play-sunethic-f1000-1000w/", fixationTypes: ["Sol", "Mur"] },
+            { name: "ANKER 870W Panneau Solaire Plug and Play", brand: "Anker SOLIX", power: 870, panels: 2, panelPower: 435, tech: "TOPCon Bifacial Double Verre", inverter: "Anker MI80 (600W/800W)", fixationIncluded: "Non spécifié comme inclus de base", fixationDetails: "Options de supports pour diverses installations", warranty: "Garantie 15 ans ; Perf. PV 30 ans ≥ 87.4%", keyFeatures: "Rendement PV 25%, câble Schuko 5m", price: null, link: "https://www.ankersolix.com/fr/kit-solaire-hes", fixationTypes: ["Sol", "Balcon", "Mur"] }
+        ];
+
+        const scenarios = [
+            { 
+                title: "Pour l'Utilisateur en Appartement avec Balcon (Contraintes d'Espace et Réglementaires)",
+                recommendations: [
+                    "<strong>Sunology CITY (300W, 2 panneaux) :</strong> Conçu spécifiquement pour les balcons, léger. <em>Vérifier disponibilité.</em>",
+                    "<strong>Ekwateur Kit 500Wc (1 panneau) :</strong> Bifacial, support inclinable, bacs de lestage. Bonne garantie.",
+                    "<strong>Kitsolaire-discount HYXIPOWER 500W Bifacial (1 panneau) :</strong> Fixation universelle balcon incluse, économique."
+                ],
+                criteria: { fixation: "Balcon", powerMax: 500 }
+            },
+            {
+                title: "Pour une Puissance Maximale sous 1000W (Petit Jardin, Terrasse)",
+                recommendations: [
+                    "<strong>Sunethic F900 Bifacial (900Wc) ou F1000 (1000Wc) :</strong> Haute puissance, composants français/européens, garantie solide, support sol inclus.",
+                    "<strong>Mon Kit Solaire DualSun 1000Wc :</strong> Panneaux français, bonne garantie. Fixation en option.",
+                    "<strong>Zendure Kit Solaire Bifacial 1000Wp :</strong> Bonne puissance. Fixation en option.",
+                    "<strong>Kitsolaire.fr Kit 1000W Bifacial :</strong> Intéressant si fixation spécifique requise (en option)."
+                ],
+                criteria: { powerMin: 800, powerMax: 1000, fixation: "Sol" }
+            },
+            {
+                title: "Pour le Meilleur Rapport Qualité/Prix",
+                recommendations: [
+                    "<strong>Beem On 500Wc (1 panneau) :</strong> Prix compétitif, puissance respectable, support polyvalent inclus.",
+                    "<strong>Kitsolaire-discount Kits LONGI 850W :</strong> Bonne puissance pour le prix. Fixation à choisir/acquérir séparément."
+                ],
+                criteria: { powerMin: 400, powerMax: 900 }
+            },
+            {
+                title: "Pour une Simplicité \"Véritablement Tout-en-Un\" (Assemblage Minimal)",
+                recommendations: [
+                    "<strong>Sunology PLAY2 (450W, 1 panneau) :</strong> 100% assemblé, déplier, lester, brancher. Mise en service ultra-rapide.",
+                    "<strong>Ekwateur Kit 500Wc (1 panneau) :</strong> Support pré-assemblé, installation rapide."
+                ],
+                criteria: { fixationIncluded: "Incluse" }
+            }
+        ];
+
+        let powerChartInstance = null;
+        let brandChartInstance = null;
+
+        function populateFilters() {
+            const brandFilter = document.getElementById('filter-brand');
+            const brands = [...new Set(kitsData.map(kit => kit.brand))].sort();
+            brands.forEach(brand => {
+                const option = document.createElement('option');
+                option.value = brand;
+                option.textContent = brand;
+                brandFilter.appendChild(option);
+            });
+        }
+
+        function displayKits(filteredKits) {
+            const tableBody = document.getElementById('kits-table-body');
+            tableBody.innerHTML = '';
+            document.getElementById('kit-count').textContent = filteredKits.length;
+
+            if (filteredKits.length === 0) {
+                const row = tableBody.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = 7;
+                cell.textContent = 'Aucun kit ne correspond à vos critères de recherche.';
+                cell.className = 'px-6 py-4 text-center text-gray-500';
+                return;
+            }
+            
+            filteredKits.forEach(kit => {
+                const row = tableBody.insertRow();
+                row.insertCell().textContent = kit.name;
+                row.insertCell().textContent = kit.brand;
+                row.insertCell().textContent = kit.power;
+                row.insertCell().textContent = kit.panels;
+                row.insertCell().textContent = kit.fixationIncluded + (kit.fixationDetails ? ` (${kit.fixationDetails.substring(0,30)}...)` : '');
+                row.insertCell().textContent = kit.price !== null ? kit.price.toFixed(2) + ' €' : 'N/A';
+                
+                const linkCell = row.insertCell();
+                const link = document.createElement('a');
+                link.href = kit.link;
+                link.textContent = 'Voir l\'offre';
+                link.target = '_blank';
+                link.className = 'text-amber-600 hover:text-amber-800 font-medium';
+                linkCell.appendChild(link);
+
+                // Add Tailwind classes for styling cells
+                Array.from(row.cells).forEach(cell => {
+                    cell.className = 'px-3 py-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-700';
+                });
+            });
+        }
+        
+        function getPowerRange(powerValue) {
+            if (powerValue === 'all') return { min: 0, max: Infinity };
+            const [min, max] = powerValue.split('-').map(Number);
+            return { min, max };
+        }
+
+        function filterKits() {
+            const powerFilter = document.getElementById('filter-power').value;
+            const panelsFilter = document.getElementById('filter-panels').value;
+            const fixationTypeFilter = document.getElementById('filter-fixation-type').value;
+            const brandFilter = document.getElementById('filter-brand').value;
+
+            const { min: minPower, max: maxPower } = getPowerRange(powerFilter);
+
+            const filtered = kitsData.filter(kit => {
+                const powerMatch = kit.power >= minPower && kit.power <= maxPower;
+                const panelsMatch = panelsFilter === 'all' || kit.panels == panelsFilter;
+                const brandMatch = brandFilter === 'all' || kit.brand === brandFilter;
+                
+                let fixationMatch = fixationTypeFilter === 'all';
+                if (!fixationMatch) {
+                    if (fixationTypeFilter === 'Incluse') {
+                        fixationMatch = kit.fixationIncluded.toLowerCase().startsWith('incluse');
+                    } else if (fixationTypeFilter === 'Optionnelle') {
+                        fixationMatch = kit.fixationIncluded.toLowerCase() === 'optionnelle';
+                    } else { // Sol, Balcon, Mur
+                        fixationMatch = kit.fixationTypes.includes(fixationTypeFilter) || 
+                                        (kit.fixationDetails && kit.fixationDetails.toLowerCase().includes(fixationTypeFilter.toLowerCase()));
+                    }
+                }
+                return powerMatch && panelsMatch && brandMatch && fixationMatch;
+            });
+            displayKits(filtered);
+            updateCharts(filtered);
+        }
+
+        function updateCharts(filteredKits) {
+            updatePowerChart(filteredKits);
+            updateBrandChart(filteredKits);
+        }
+
+        function updatePowerChart(kits) {
+            const powerRanges = {
+                '0-400 Wc': 0,
+                '401-600 Wc': 0,
+                '601-800 Wc': 0,
+                '801-1000 Wc': 0,
+            };
+            kits.forEach(kit => {
+                if (kit.power <= 400) powerRanges['0-400 Wc']++;
+                else if (kit.power <= 600) powerRanges['401-600 Wc']++;
+                else if (kit.power <= 800) powerRanges['601-800 Wc']++;
+                else if (kit.power <= 1000) powerRanges['801-1000 Wc']++;
+            });
+
+            const ctx = document.getElementById('powerChart').getContext('2d');
+            if (powerChartInstance) {
+                powerChartInstance.destroy();
+            }
+            powerChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(powerRanges),
+                    datasets: [{
+                        label: 'Nombre de Kits',
+                        data: Object.values(powerRanges),
+                        backgroundColor: '#FBBF24', // amber-400
+                        borderColor: '#D97706', // amber-600
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function updateBrandChart(kits) {
+            const brandCounts = {};
+            kits.forEach(kit => {
+                brandCounts[kit.brand] = (brandCounts[kit.brand] || 0) + 1;
+            });
+
+            const sortedBrands = Object.entries(brandCounts)
+                .sort(([,a],[,b]) => b-a)
+                .slice(0, 7); // Show top 7 brands + "Autres"
+            
+            let otherCount = 0;
+            if (Object.keys(brandCounts).length > 7) {
+                 Object.entries(brandCounts)
+                    .sort(([,a],[,b]) => b-a)
+                    .slice(7)
+                    .forEach(([,count]) => otherCount += count);
+            }
+
+            const chartLabels = sortedBrands.map(entry => entry[0]);
+            const chartData = sortedBrands.map(entry => entry[1]);
+
+            if (otherCount > 0) {
+                chartLabels.push("Autres");
+                chartData.push(otherCount);
+            }
+            
+            const chartColors = ['#FBBF24', '#F97316', '#10B981', '#3B82F6', '#6366F1', '#EC4899', '#8B5CF6', '#78716C'];
+
+
+            const ctx = document.getElementById('brandChart').getContext('2d');
+            if (brandChartInstance) {
+                brandChartInstance.destroy();
+            }
+            brandChartInstance = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Nombre de Kits',
+                        data: chartData,
+                        backgroundColor: chartColors.slice(0, chartLabels.length),
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { 
+                            position: 'bottom',
+                            labels: {
+                                 boxWidth: 15,
+                                 padding: 10,
+                                 generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        return data.labels.map(function(label, i) {
+                                            const meta = chart.getDatasetMeta(0);
+                                            const style = meta.controller.getStyle(i);
+                                            // Truncate label if too long
+                                            const truncatedLabel = label.length > 15 ? label.substring(0, 15) + '...' : label;
+                                            return {
+                                                text: `${truncatedLabel} (${data.datasets[0].data[i]})`,
+                                                fillStyle: style.backgroundColor,
+                                                strokeStyle: style.borderColor,
+                                                lineWidth: style.borderWidth,
+                                                hidden: isNaN(data.datasets[0].data[i]) || meta.data[i].hidden,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                }
+                            }
+                        } 
+                    }
+                }
+            });
+        }
+        
+        function populateScenarios() {
+            const container = document.getElementById('scenarios-container');
+            container.innerHTML = '';
+            scenarios.forEach((scenario, index) => {
+                const scenarioDiv = document.createElement('div');
+                scenarioDiv.className = 'bg-amber-50 p-4 rounded-lg shadow-sm';
+
+                const button = document.createElement('button');
+                button.className = 'flex justify-between items-center w-full text-left text-amber-700 font-semibold focus:outline-none';
+                button.innerHTML = `<span>${scenario.title}</span> <span class="transform transition-transform duration-200 ease-in-out ${index === 0 ? 'rotate-180' : ''}">▼</span>`;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = `mt-2 text-sm text-stone-700 space-y-1 ${index === 0 ? '' : 'hidden'}`;
+                
+                scenario.recommendations.forEach(rec => {
+                    const p = document.createElement('p');
+                    p.innerHTML = `• ${rec}`;
+                    contentDiv.appendChild(p);
+                });
+
+                button.addEventListener('click', () => {
+                    const isHidden = contentDiv.classList.toggle('hidden');
+                    button.querySelector('span:last-child').classList.toggle('rotate-180', !isHidden);
+                    // Optional: Auto-scroll to this scenario or apply filters
+                });
+
+                scenarioDiv.appendChild(button);
+                scenarioDiv.appendChild(contentDiv);
+                container.appendChild(scenarioDiv);
+            });
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            populateFilters();
+            filterKits(); // Initial display
+            populateScenarios();
+
+            document.getElementById('filter-power').addEventListener('change', filterKits);
+            document.getElementById('filter-panels').addEventListener('change', filterKits);
+            document.getElementById('filter-fixation-type').addEventListener('change', filterKits);
+            document.getElementById('filter-brand').addEventListener('change', filterKits);
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            document.querySelectorAll('nav a[href^="#"], #mobile-menu a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    mobileMenu.classList.add('hidden'); 
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                        
+                        // Update active link
+                        document.querySelectorAll('nav a[href^="#"], #mobile-menu a[href^="#"]').forEach(link => link.classList.remove('active'));
+                        if(document.querySelector(`#desktop-nav a[href="${targetId}"]`)) document.querySelector(`#desktop-nav a[href="${targetId}"]`).classList.add('active');
+                        if(document.querySelector(`#mobile-menu a[href="${targetId}"]`)) document.querySelector(`#mobile-menu a[href="${targetId}"]`).classList.add('active');
+
+                    }
+                });
+            });
+
+            // Active link highlighting on scroll
+            const sections = document.querySelectorAll('main section');
+            const navLinks = document.querySelectorAll('#desktop-nav a, #mobile-menu a');
+
+            window.onscroll = () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) { // Adjusted for sticky header
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+             // Set initial active link
+            const initialHash = window.location.hash || '#accueil';
+            if(document.querySelector(`#desktop-nav a[href="${initialHash}"]`)) document.querySelector(`#desktop-nav a[href="${initialHash}"]`).classList.add('active');
+            if(document.querySelector(`#mobile-menu a[href="${initialHash}"]`)) document.querySelector(`#mobile-menu a[href="${initialHash}"]`).classList.add('active');
+            if (initialHash && document.querySelector(initialHash)) {
+                 setTimeout(() => document.querySelector(initialHash).scrollIntoView({ behavior: 'auto' }), 0);
+            }
+
+        });
+    </script>
+</body>
+</html>

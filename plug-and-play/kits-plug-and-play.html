@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infographie : Marché des Kits Solaires Plug & Play en France</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #073B4C; /* Dark Blue from Energetic & Playful */
+            color: #FFFFFF;
+        }
+        .chart-container {
+            position: relative;
+            background-color: #FFFFFF;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .stat-card {
+            background-color: #118AB2; /* Strong Blue */
+            color: #FFFFFF;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #FFD166; /* Bright Yellow */
+        }
+        .stat-label {
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+        .section-title {
+            color: #FFD166; /* Bright Yellow */
+        }
+        .card {
+            background-color: #FFFFFF;
+            color: #073B4C;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .flowchart-step {
+            background-color: #06D6A0; /* Lively Green */
+            color: #073B4C;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .flowchart-arrow {
+            font-size: 1.5rem;
+            color: #FFD166; /* Bright Yellow */
+            margin: 0 0.5rem;
+        }
+        .flowchart-connector {
+            width: 2px;
+            background-color: #FFD166;
+            height: 20px;
+            margin: 0.5rem auto;
+        }
+        .nav-button {
+            background-color: #FF6B6B; /* Vibrant Red/Coral */
+            color: #FFFFFF;
+            transition: background-color 0.3s ease;
+        }
+        .nav-button:hover {
+            background-color: #e05252;
+        }
+        h1, h2, h3 {
+             text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Plan Narratif:
+        1. Introduction: Qu'est-ce qu'un kit solaire plug & play? Avantages.
+        2. Croissance du Marché & Acteurs: Dynamique, chiffres clés, principaux acteurs.
+        3. Au Coeur du Kit: Focus sur les systèmes de fixation et la puissance des panneaux.
+        4. Benchmark Prix: Fourchettes de prix, prix/Wc, facteurs d'influence.
+        5. Cadre Réglementaire: Démarches, normes (notamment NF C15-100).
+        6. Guide de Sélection & Conclusion: Critères pour choisir, perspectives.
+    -->
+    <!-- Choix des Visualisations (Confirmant AUCUN SVG, AUCUN MERMAID JS):
+        - Introduction: Chiffre clé (Texte HTML), Liste avantages (HTML ul).
+        - Croissance Marché: Chiffre clé (Texte HTML), Diagramme Barres (Chart.js Canvas) pour types d'acteurs, Cartes Acteurs (HTML/CSS).
+        - Fixations: Diagramme/Cartes HTML/CSS avec icônes Unicode.
+        - Puissance Panneaux: Diagramme Barres (Chart.js Canvas) pour gammes puissance, Diagramme Circulaire (Chart.js Canvas) pour technologies.
+        - Benchmark Prix: Chiffre clé (Texte HTML), Diagramme Barres (Chart.js Canvas) pour prix/Wc.
+        - Réglementation: Organigramme (HTML/CSS) pour démarches, Encadré (HTML/CSS) pour NF C15-100.
+        - Sélection: Liste (HTML ul) avec icônes Unicode.
+    -->
+    <header class="py-8 md:py-12 text-center bg-gradient-to-r from-[#118AB2] to-[#06D6A0]">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl md:text-5xl font-bold text-white">Le Marché Français des Kits Solaires Plug & Play</h1>
+            <p class="mt-4 text-lg md:text-xl text-gray-200">Tendances, Analyse des Fixations, Puissances et Prix des Systèmes 800-1000W (2 panneaux)</p>
+        </div>
+    </header>
+
+    <nav class="sticky top-0 z-50 bg-[#073B4C] shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-wrap justify-center space-x-2 sm:space-x-4 py-3 text-sm">
+                <a href="#introduction" class="nav-button hover:bg-opacity-80 font-semibold px-3 py-2 rounded-md">Introduction</a>
+                <a href="#marche" class="nav-button hover:bg-opacity-80 font-semibold px-3 py-2 rounded-md">Marché</a>
+                <a href="#produits" class="nav-button hover:bg-opacity-80 font-semibold px-3 py-2 rounded-md">Produits</a>
+                <a href="#prix" class="nav-button hover:bg-opacity-80 font-semibold px-3 py-2 rounded-md">Prix</a>
+                <a href="#reglementation" class="nav-button hover:bg-opacity-80 font-semibold px-3 py-2 rounded-md">Réglementation</a>
+                <a href="#selection" class="nav-button hover:bg-opacity-80 font-semibold px-3 py-2 rounded-md">Choisir</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 sm:p-6 md:p-8">
+
+        <section id="introduction" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold mb-6 text-center section-title">1. Le Solaire Simplifié : Qu'est-ce qu'un Kit Plug & Play ?</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="card p-6">
+                    <p class="text-lg mb-4">Les systèmes solaires "plug-and-play" sont conçus pour une installation directe et aisée par l'utilisateur final. Ils se branchent généralement sur une prise de courant standard, sans nécessiter l'intervention d'un professionnel ni de modifications complexes de l'installation électrique.</p>
+                    <p class="text-lg">Un kit typique de 800-1000W comprend deux panneaux solaires, un ou plusieurs micro-onduleurs, le câblage et un système de fixation.</p>
+                </div>
+                <div class="space-y-6">
+                    <div class="stat-card">
+                        <div class="stat-number">~30 min</div>
+                        <div class="stat-label">Temps d'installation moyen revendiqué</div>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-3 text-[#118AB2]">Principaux Avantages :</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li><span class="font-semibold">Facilité d'installation :</span> Accessible à tous.</li>
+                            <li><span class="font-semibold">Portabilité :</span> Idéal pour locataires, déplaçable.</li>
+                            <li><span class="font-semibold">Accessibilité :</span> Jardins, balcons, terrasses.</li>
+                            <li><span class="font-semibold">Investissement initial réduit :</span> Comparé aux installations traditionnelles.</li>
+                            <li><span class="font-semibold">Autoconsommation immédiate :</span> Réduction directe de la facture.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="marche" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold mb-8 text-center section-title">2. Un Marché en Pleine Expansion</h2>
+            <div class="grid md:grid-cols-3 gap-8 mb-8">
+                <div class="stat-card">
+                    <div class="stat-number">30%</div>
+                    <div class="stat-label">Croissance du marché en 2023 (source: Planete Business)</div>
+                </div>
+                <div class="stat-card col-span-2">
+                    <div class="stat-label text-2xl font-semibold mb-2">Moteurs de Croissance</div>
+                    <p class="text-lg">Sensibilisation accrue aux énergies renouvelables</p>
+                    <p class="text-lg">Hausse des prix de l'électricité</p>
+                    <p class="text-lg">Désir d'autosuffisance énergétique</p>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-4 text-center text-[#118AB2]">Acteurs Clés du Marché Français</h3>
+                    <p class="text-center text-gray-600 mb-4">Le marché est animé par une diversité d'acteurs :</p>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-gray-100 rounded-md"><strong>Marques Spécialisées :</strong> Sunology, Beem Energy, Sunethic, Dualsun, Ekwateur, Oscaro Power.</div>
+                        <div class="p-3 bg-gray-100 rounded-md"><strong>Détaillants en Ligne :</strong> Allo Solar, Solarchoc, Mon Kit Solaire.</div>
+                        <div class="p-3 bg-gray-100 rounded-md"><strong>Grandes Surfaces de Bricolage :</strong> Leroy Merlin, Castorama, Bricomarché.</div>
+                        <div class="p-3 bg-gray-100 rounded-md"><strong>Fabricants de Composants :</strong> Hoymiles, APsystems (micro-onduleurs).</div>
+                    </div>
+                     <p class="text-sm text-gray-500 mt-4">Certains acteurs mettent en avant une production ou un assemblage en France (ex: Sunology, Sunethic, Dualsun), un argument de plus en plus valorisé.</p>
+                </div>
+                <div class="chart-container w-full max-w-md mx-auto h-[300px] sm:h-[350px] md:h-[400px] max-h-[400px]">
+                    <canvas id="acteursMarcheChart"></canvas>
+                </div>
+            </div>
+             <p class="mt-6 text-center text-gray-300">Le graphique ci-dessus illustre la répartition estimée de la présence des différents types d'acteurs sur le marché des kits solaires plug-and-play. Les marques spécialisées, avec leur expertise technique, côtoient les détaillants en ligne offrant une large gamme et les grandes surfaces de bricolage qui touchent un public vaste.</p>
+        </section>
+
+        <section id="produits" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold mb-8 text-center section-title">3. Au Cœur du Kit : Fixations et Panneaux</h2>
+            
+            <div class="mb-12">
+                <h3 class="text-2xl font-semibold mb-6 text-center text-[#FFD166]">3.1 Systèmes de Fixation : La Clé de l'Adaptabilité</h3>
+                <p class="text-center mb-6 text-gray-300">Le choix du système de fixation est crucial. Il doit être adapté à votre logement, facile à installer et robuste.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="card p-4 text-center">
+                        <div class="text-4xl mb-2">🏡</div>
+                        <h4 class="font-semibold text-lg mb-1 text-[#118AB2]">Montage au Sol</h4>
+                        <p class="text-sm text-gray-600">Souvent avec lestage (sable, dalles). Simple pour jardins, terrasses.</p>
+                    </div>
+                    <div class="card p-4 text-center">
+                        <div class="text-4xl mb-2">🧱</div>
+                        <h4 class="font-semibold text-lg mb-1 text-[#118AB2]">Montage Mural</h4>
+                        <p class="text-sm text-gray-600">Optimise l'espace. Peut nécessiter plus de bricolage.</p>
+                    </div>
+                    <div class="card p-4 text-center">
+                        <div class="text-4xl mb-2">🌇</div>
+                        <h4 class="font-semibold text-lg mb-1 text-[#118AB2]">Fixation Balcon</h4>
+                        <p class="text-sm text-gray-600">Crochets spécifiques, souvent sans perçage. Idéal locataires.</p>
+                    </div>
+                    <div class="card p-4 text-center">
+                        <div class="text-4xl mb-2">🔩</div>
+                        <h4 class="font-semibold text-lg mb-1 text-[#118AB2]">Montage Toiture (Plate)</h4>
+                        <p class="text-sm text-gray-600">Pour abris, garages. Vigilance sur étanchéité et sécurité.</p>
+                    </div>
+                </div>
+                <div class="mt-6 grid sm:grid-cols-2 gap-4">
+                    <div class="card p-4">
+                        <h5 class="font-semibold text-md mb-1 text-[#06D6A0]">Matériaux Courants :</h5>
+                        <p class="text-sm text-gray-600">🔗 Aluminium (légèreté, résistance), Acier galvanisé (robustesse).</p>
+                    </div>
+                    <div class="card p-4">
+                        <h5 class="font-semibold text-md mb-1 text-[#06D6A0]">Ajustabilité :</h5>
+                        <p class="text-sm text-gray-600">📐 Inclinaison souvent réglable pour optimiser la captation solaire.</p>
+                    </div>
+                </div>
+                <p class="mt-6 text-gray-300">L'adéquation du système de fixation à votre lieu d'installation (sol, mur, balcon, toit plat accessible) est primordiale. Les solutions lestables sont simples mais nécessitent une surface plane et une charge adéquate contre le vent. Les fixations murales ou pour toiture peuvent offrir une meilleure orientation mais demandent plus de soin à l'installation.</p>
+            </div>
+
+            <div>
+                <h3 class="text-2xl font-semibold mb-6 text-center text-[#FFD166]">3.2 Puissance et Technologie des Panneaux</h3>
+                <p class="text-center mb-6 text-gray-300">La puissance individuelle des panneaux (généralement 2 par kit de 800-1000W) et leur technologie influencent directement la production d'énergie.</p>
+                <div class="grid md:grid-cols-2 gap-8 items-start">
+                    <div class="chart-container w-full max-w-md mx-auto h-[300px] sm:h-[350px] md:h-[400px] max-h-[400px]">
+                        <canvas id="puissancePanneauxChart"></canvas>
+                    </div>
+                    <div class="chart-container w-full max-w-md mx-auto h-[300px] sm:h-[350px] md:h-[400px] max-h-[400px]">
+                        <canvas id="technologiePanneauxChart"></canvas>
+                    </div>
+                </div>
+                <div class="mt-6 card p-6">
+                    <h4 class="font-semibold text-lg mb-2 text-[#118AB2]">Points Clés sur les Panneaux :</h4>
+                    <ul class="list-disc list-inside space-y-1 text-gray-700">
+                        <li><strong>Puissances individuelles courantes :</strong> 400Wc, 420-450Wc, 500Wc par panneau.</li>
+                        <li><strong>Technologies répandues :</strong>
+                            <ul class="list-disc list-inside ml-4">
+                                <li><span class="font-semibold">Monocristallin :</span> Bon rendement standard.</li>
+                                <li><span class="font-semibold">Bifacial :</span> Capte la lumière des deux côtés, potentiel de rendement accru.</li>
+                                <li><span class="font-semibold">TOPCon :</span> Efficacité supérieure, meilleure performance à long terme.</li>
+                                <li><span class="font-semibold">Bi-verre :</span> Durabilité accrue.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Dimensions et poids :</strong> À considérer pour la manipulation et l'espace (ex: un panneau de 450Wc mesure environ 1.76m x 1.13m).</li>
+                    </ul>
+                </div>
+                <p class="mt-6 text-gray-300">Des panneaux plus puissants individuellement (ex: 500Wc) permettent d'atteindre la puissance totale du kit avec une empreinte potentiellement optimisée. Les technologies comme le bifacial ou TOPCon peuvent améliorer le rendement, surtout si l'exposition n'est pas parfaite, mais peuvent aussi influencer le prix.</p>
+            </div>
+        </section>
+
+        <section id="prix" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold mb-8 text-center section-title">4. Benchmark Prix : Combien Ça Coûte ?</h2>
+            <div class="grid md:grid-cols-3 gap-8 mb-8">
+                <div class="stat-card">
+                    <div class="stat-number">€500 <span class="text-2xl">-</span> €1600+</div>
+                    <div class="stat-label">Fourchette de prix typique pour un kit 2 panneaux (800-1000W)</div>
+                </div>
+                 <div class="stat-card">
+                    <div class="stat-number">€0.40 <span class="text-2xl">-</span> €2.00+</div>
+                    <div class="stat-label">Prix par Watt crête (€/Wc) observé</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">3 <span class="text-2xl">-</span> 7 ans</div>
+                    <div class="stat-label">Délai de rentabilité souvent annoncé</div>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-3 text-[#118AB2]">Facteurs Influant sur les Prix :</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Marque et Origine :</strong> Marques premium ou "Fabriqué en France/Europe" souvent plus chères.</li>
+                        <li><strong>Technologie des Panneaux :</strong> Bifacial, TOPCon, bi-verre augmentent le coût.</li>
+                        <li><strong>Système de Fixation :</strong> Qualité, robustesse, adaptabilité et design.</li>
+                        <li><strong>Micro-onduleur :</strong> Marque réputée et garantie longue (ex: 20-25 ans).</li>
+                        <li><strong>Accessoires Inclus :</strong> Longueur des câbles, suivi de production avancé.</li>
+                        <li><strong>Garanties Générales :</strong> Plus longues et complètes = prix plus élevé.</li>
+                    </ul>
+                    <p class="mt-4 text-sm text-gray-500">Le ratio €/Wc est utile, mais la qualité globale, les garanties et l'adéquation du système de fixation sont cruciales pour la valeur à long terme.</p>
+                </div>
+                <div class="chart-container w-full max-w-md mx-auto h-[300px] sm:h-[350px] md:h-[400px] max-h-[400px]">
+                    <canvas id="prixWcChart"></canvas>
+                </div>
+            </div>
+            <p class="mt-6 text-center text-gray-300">Le graphique illustre la variation du prix par Watt crête (€/Wc) pour différents segments de kits. Les options d'entrée de gamme peuvent offrir un €/Wc bas, mais il est essentiel de vérifier la qualité des composants, notamment du système de fixation et du micro-onduleur, ainsi que les durées de garantie.</p>
+        </section>
+
+        <section id="reglementation" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold mb-8 text-center section-title">5. Cadre Réglementaire : Ce Qu'il Faut Savoir</h2>
+            <p class="text-center mb-6 text-gray-300">L'installation, même simplifiée, est soumise à des règles pour assurer la sécurité et la conformité.</p>
+            
+            <div class="card p-6 mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-center text-[#118AB2]">Démarches Administratives Clés</h3>
+                <div class="flex flex-col items-center space-y-2">
+                    <div class="flowchart-step w-full md:w-3/4 lg:w-1/2">1. Achat du Kit Solaire Plug & Play</div>
+                    <div class="flowchart-connector"></div>
+                    <div class="flowchart-step w-full md:w-3/4 lg:w-1/2">2. Installation au sol &lt;1.80m ET puissance &lt;3kWc ?</div>
+                    <div class="flex justify-around w-full md:w-3/4 lg:w-1/2 mt-2">
+                        <div class="flex flex-col items-center w-1/2 px-1">
+                            <div class="text-sm text-center text-gray-200 mb-1">OUI</div>
+                            <div class="flowchart-connector"></div>
+                            <div class="flowchart-step w-full">Généralement PAS de Déclaration en Mairie</div>
+                        </div>
+                        <div class="flex flex-col items-center w-1/2 px-1">
+                            <div class="text-sm text-center text-gray-200 mb-1">NON (ou fixation murale >1.8m, etc.)</div>
+                            <div class="flowchart-connector"></div>
+                            <div class="flowchart-step w-full">Déclaration Préalable en Mairie (CERFA 13703)</div>
+                        </div>
+                    </div>
+                    <div class="flowchart-connector"></div>
+                     <div class="flowchart-step w-full md:w-3/4 lg:w-1/2">3. Déclaration à Enedis (CACSI) - OBLIGATOIRE</div>
+                     <p class="text-sm text-center text-gray-100">(Convention d'Autoconsommation Sans Injection, en ligne, certificat onduleur requis)</p>
+                    <div class="flowchart-connector"></div>
+                    <div class="flowchart-step w-full md:w-3/4 lg:w-1/2">4. Consuel nécessaire ?</div>
+                     <p class="text-sm text-center text-gray-100">(Généralement NON si kit <3kVA branché sur prise existante, sans batterie, sans modif. installation fixe)</p>
+                </div>
+            </div>
+
+            <div class="card p-6 border-2 border-[#FF6B6B] bg-[#FF6B6B] bg-opacity-10">
+                <h3 class="text-xl font-bold mb-3 text-center text-[#FF6B6B]">⚠️ Attention : Évolution Norme NF C15-100</h3>
+                <p class="text-center text-lg text-gray-100">
+                    Une mise à jour de la norme NF C15-100 (applicable obligatoirement en septembre 2025) pourrait interdire le branchement d'un générateur d'énergie sur un circuit terminal via une simple prise de courant.
+                </p>
+                <p class="text-center mt-2 text-gray-200">
+                    Cela crée une incertitude pour les kits "plug-and-play". Les fabricants et les instances professionnelles cherchent des clarifications.
+                    <strong class="block mt-1">Renseignez-vous auprès de votre vendeur sur la conformité et les recommandations futures.</strong>
+                </p>
+            </div>
+            <p class="mt-6 text-gray-300">Outre ces démarches, assurez-vous que votre installation électrique domestique (prise, terre, disjoncteur différentiel 30mA) est conforme et sécurisée. Ne branchez pas le kit sur une multiprise.</p>
+        </section>
+
+        <section id="selection" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold mb-8 text-center section-title">6. Bien Choisir Son Kit & Conclusion</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-3 text-[#118AB2]">Critères de Sélection Essentiels :</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start"><span class="text-2xl mr-3 text-[#06D6A0]">🏠</span> <div><strong>Type de logement et Espace :</strong> Balcon, jardin, terrasse ? Surface disponible ?</div></li>
+                        <li class="flex items-start"><span class="text-2xl mr-3 text-[#06D6A0]">☀️</span> <div><strong>Exposition et Consommation :</strong> Bon ensoleillement ? Quel est votre talon de consommation ?</div></li>
+                        <li class="flex items-start"><span class="text-2xl mr-3 text-[#06D6A0]">🔩</span> <div><strong>Système de Fixation :</strong> Adapté, robuste, facile à installer pour VOUS ? Inclus ou en option ?</div></li>
+                        <li class="flex items-start"><span class="text-2xl mr-3 text-[#06D6A0]">💡</span> <div><strong>Panneaux et Onduleur :</strong> Puissance, technologie (bifacial, TOPCon ?), marque et garantie de l'onduleur.</div></li>
+                        <li class="flex items-start"><span class="text-2xl mr-3 text-[#06D6A0]">🛡️</span> <div><strong>Garanties et Support :</strong> Durées pour panneaux et onduleur ? Réputation du vendeur (SAV, livraison) ?</div></li>
+                        <li class="flex items-start"><span class="text-2xl mr-3 text-[#06D6A0]">💰</span> <div><strong>Prix vs. Valeur :</strong> Au-delà du €/Wc, analysez la qualité globale et la durabilité.</div></li>
+                        <li class="flex items-start"><span class="text-2xl mr-3 text-[#06D6A0]">📜</span> <div><strong>Conformité Réglementaire :</strong> Position du vendeur sur la NF C15-100 ?</div></li>
+                    </ul>
+                </div>
+                <div class="card p-6 bg-[#118AB2] text-white">
+                    <h3 class="text-2xl font-semibold mb-4 text-center text-[#FFD166]">Conclusion et Perspectives</h3>
+                    <p class="mb-3">Le marché français des kits solaires plug-and-play est dynamique et prometteur, offrant une solution d'accès à l'énergie solaire pour un public plus large. La facilité d'installation et les économies potentielles sont des atouts majeurs.</p>
+                    <p class="mb-3">Le principal défi actuel réside dans l'incertitude réglementaire liée à la norme NF C15-100. La clarification de cette norme sera déterminante pour l'avenir du "vrai" plug-and-play.</p>
+                    <p>Les innovations continueront probablement sur l'efficacité des panneaux, la robustesse des fixations et des solutions de connexion sécurisées et conformes.</p>
+                    <p class="mt-4 font-semibold">Conseil final : Évaluez bien vos besoins, comparez attentivement les offres et renseignez-vous sur les aspects réglementaires avant tout achat.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="mt-16 py-8 text-center border-t border-gray-700">
+        <p class="text-sm text-gray-400">Infographie basée sur l'Étude de Marché et Benchmark Prix des Systèmes Solaires Plug-and-Play (800-1000W, 2 Panneaux) en France, rapport du 23 mai 2025.</p>
+        <p class="text-xs text-gray-500 mt-1">Données et prix présentés à titre indicatif. Consultez les fiches produits des vendeurs pour les informations les plus récentes.</p>
+    </footer>
+
+    <script>
+        function wrapText(text, maxWidthChars = 16) {
+            if (typeof text !== 'string' || text.length <= maxWidthChars) {
+                return text;
+            }
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + word).length > maxWidthChars && currentLine.length > 0) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            }
+            lines.push(currentLine.trim());
+            return lines;
+        }
+
+        const tooltipTitleCallback = function(tooltipItems) {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+
+        const commonChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#073B4C' // Dark Blue for legend text inside chart cards
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: tooltipTitleCallback
+                    },
+                    backgroundColor: '#073B4C',
+                    titleColor: '#FFFFFF',
+                    bodyColor: '#FFFFFF',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#073B4C' },
+                    grid: { color: '#DDDDDD' }
+                },
+                x: {
+                    ticks: { color: '#073B4C' },
+                    grid: { display: false }
+                }
+            }
+        };
+        
+        const commonPieChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: '#073B4C'
+                    }
+                },
+                tooltip: {
+                     callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed !== null) {
+                                label += context.parsed + '%';
+                            }
+                            return label;
+                        },
+                        title: tooltipTitleCallback
+                    },
+                    backgroundColor: '#073B4C',
+                    titleColor: '#FFFFFF',
+                    bodyColor: '#FFFFFF',
+                }
+            }
+        };
+
+        const colors = ['#FF6B6B', '#FFD166', '#06D6A0', '#118AB2', '#F0F0F0'];
+
+        new Chart(document.getElementById('acteursMarcheChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Marques Spécialisées', 'Détaillants en Ligne', wrapText('Grandes Surfaces Bricolage'), 'Fabricants Composants'].map(l => wrapText(l)),
+                datasets: [{
+                    label: 'Présence Estimée sur le Marché (%)',
+                    data: [35, 30, 25, 10],
+                    backgroundColor: [colors[0], colors[1], colors[2], colors[3]],
+                    borderColor: '#FFFFFF',
+                    borderWidth: 1
+                }]
+            },
+            options: commonChartOptions
+        });
+
+        new Chart(document.getElementById('puissancePanneauxChart'), {
+            type: 'bar',
+            data: {
+                labels: ['~400 Wc', wrapText('~420-450 Wc'), '~500 Wc'].map(l => wrapText(l)),
+                datasets: [{
+                    label: 'Puissance Individuelle Typique par Panneau',
+                    data: [30, 45, 25], 
+                    backgroundColor: [colors[2], colors[1], colors[0]],
+                     borderColor: '#FFFFFF',
+                    borderWidth: 1
+                }]
+            },
+             options: { ...commonChartOptions, plugins: { ...commonChartOptions.plugins, legend: { display: false } } }
+        });
+
+        new Chart(document.getElementById('technologiePanneauxChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Monocristallin', 'Bifacial', 'TOPCon', 'Autres (Bi-verre, etc.)'].map(l => wrapText(l)),
+                datasets: [{
+                    label: 'Répartition des Technologies de Panneaux (Estimé)',
+                    data: [35, 30, 20, 15],
+                    backgroundColor: [colors[0], colors[1], colors[2], colors[3]],
+                    hoverOffset: 4
+                }]
+            },
+            options: commonPieChartOptions
+        });
+
+        new Chart(document.getElementById('prixWcChart'), {
+            type: 'bar',
+            data: {
+                labels: [wrapText('Kit Entrée de Gamme'), wrapText('Kit Milieu de Gamme'), 'Kit Premium'].map(l => wrapText(l)),
+                datasets: [{
+                    label: 'Prix Indicatif par Watt crête (€/Wc)',
+                    data: [0.65, 1.30, 1.90],
+                    backgroundColor: [colors[2], colors[1], colors[0]],
+                     borderColor: '#FFFFFF',
+                    borderWidth: 1
+                }]
+            },
+            options: { ...commonChartOptions, plugins: { ...commonChartOptions.plugins, legend: { display: false } } }
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
